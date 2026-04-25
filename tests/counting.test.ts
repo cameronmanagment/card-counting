@@ -1,5 +1,16 @@
 import { describe, expect, it } from 'vitest'
-import { applyBucket, createShoe, getShoeStats, undoLast } from '../src/counting'
+import {
+  applyBucket,
+  createShoe,
+  defaultGameSettings,
+  expandedS17DeviationRows,
+  fab4SurrenderRows,
+  getDeviationAvailability,
+  getShoeStats,
+  illustrious18Rows,
+  normalizeGameSettings,
+  undoLast,
+} from '../src/counting'
 
 describe('Hi-Lo counting engine', () => {
   it('applies low, mid, and high buckets with correct running count deltas', () => {
@@ -58,5 +69,39 @@ describe('Hi-Lo counting engine', () => {
     expect(shoe.cardsSeen).toBe(52)
     expect(stats.cardsRemaining).toBe(0)
     expect(stats.isComplete).toBe(true)
+  })
+
+  it('ships the complete Illustrious 18 and Fab 4 decision tables', () => {
+    expect(illustrious18Rows).toHaveLength(18)
+    expect(fab4SurrenderRows).toHaveLength(4)
+    expect(expandedS17DeviationRows).toHaveLength(20)
+    expect(illustrious18Rows[0]).toMatchObject({ priority: 1, play: 'Insurance', index: 3 })
+    expect(illustrious18Rows[17]).toMatchObject({ priority: 18, play: '13 vs 3', index: -2 })
+    expect(fab4SurrenderRows.map((row) => row.play)).toEqual(['14 vs 10', '15 vs 10', '15 vs 9', '15 vs A'])
+  })
+
+  it('normalizes settings and disables unavailable surrender/S17-only rows', () => {
+    const settings = normalizeGameSettings({
+      deckCount: 8,
+      dealerSoft17: 'H17',
+      doubleAfterSplit: false,
+      lateSurrender: false,
+    })
+
+    expect(settings).toEqual({
+      deckCount: 8,
+      dealerSoft17: 'H17',
+      doubleAfterSplit: false,
+      lateSurrender: false,
+    })
+    expect(getDeviationAvailability(fab4SurrenderRows[0], settings)).toEqual({
+      isAvailable: false,
+      note: 'Late surrender off',
+    })
+    expect(getDeviationAvailability(expandedS17DeviationRows[0], settings)).toEqual({
+      isAvailable: false,
+      note: 'S17 chart',
+    })
+    expect(getDeviationAvailability(illustrious18Rows[0], defaultGameSettings).isAvailable).toBe(true)
   })
 })

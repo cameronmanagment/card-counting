@@ -2,9 +2,10 @@ import {
   type CardBucket,
   bucketDeltas,
   bucketShortLabels,
+  formatGameSettings,
   getShoeStats,
 } from './counting'
-import { type AppState, guidePages, menuItems, selectedDeckCount } from './state'
+import { type AppState, guidePages, menuItems, selectedDeckCount, settingValueLabel, settingsItems } from './state'
 
 const displayWidth = 48
 const fullDisplayWidth = 58
@@ -36,6 +37,8 @@ export function renderGlasses(state: AppState): string {
       return renderMenu(state)
     case 'guide':
       return renderGuide(state)
+    case 'settings':
+      return renderSettings(state)
     case 'count':
     default:
       return renderCount(state)
@@ -46,6 +49,7 @@ export function renderGlassesLayout(state: AppState): GlassesTextRegion[] {
   if (state.mode === 'count') return renderCountLayout(state)
   if (state.mode === 'menu') return renderMenuLayout(state)
   if (state.mode === 'guide') return renderGuideLayout(state)
+  if (state.mode === 'settings') return renderSettingsLayout(state)
   if (state.mode === 'setup') return renderSetupLayout(state)
 
   return [
@@ -223,6 +227,65 @@ function renderMenuLayout(state: AppState): GlassesTextRegion[] {
       height: canvasHeight,
       content: ' ',
       capture: true,
+    }),
+  ]
+}
+
+function renderSettings(state: AppState): string {
+  return pageLines(settingsRowsFor(state), fullDisplayWidth)
+}
+
+function renderSettingsLayout(state: AppState): GlassesTextRegion[] {
+  const rows = settingsSplitRowsFor(state)
+  const rightWidth = canvasWidth - rightRailX - rightEdgeInset
+
+  return [
+    textRegion({
+      id: 1,
+      name: 'settings-left',
+      x: 0,
+      y: 0,
+      width: canvasWidth,
+      height: rows.length * lineHeight,
+      content: rows.map((row) => row.left).join('\n'),
+    }),
+    textRegion({
+      id: 2,
+      name: 'settings-right',
+      x: rightRailX,
+      y: 0,
+      width: canvasWidth - rightRailX,
+      height: rows.length * lineHeight,
+      content: rows.map((row) => (row.right === undefined ? '' : rightAlignForWidth(row.right, rightWidth))).join('\n'),
+    }),
+    textRegion({
+      id: 8,
+      name: 'input',
+      x: 0,
+      y: 0,
+      width: canvasWidth,
+      height: canvasHeight,
+      content: ' ',
+      capture: true,
+    }),
+  ]
+}
+
+function settingsRowsFor(state: AppState): string[] {
+  return settingsSplitRowsFor(state).map((row) =>
+    row.right === undefined ? fit(row.left, fullDisplayWidth) : leftRight(row.left, row.right, fullDisplayWidth),
+  )
+}
+
+function settingsSplitRowsFor(state: AppState): GuideRow[] {
+  return [
+    { left: 'SETTINGS', right: `${state.selectedSettingsIndex + 1}/${settingsItems.length}` },
+    { left: fit(formatGameSettings(state.settings), fullDisplayWidth) },
+    { left: '' },
+    ...settingsItems.map((item, index) => {
+      const marker = index === state.selectedSettingsIndex ? '>' : ' '
+      const value = settingValueLabel(state.settings, item)
+      return { left: `${marker} ${item.toUpperCase()}`, right: value }
     }),
   ]
 }
@@ -476,13 +539,57 @@ const compactGuidePages: CompactGuidePage[] = [
     ],
   },
   {
-    title: 'INDEX DRILLS',
+    title: 'I18 1-6',
     rows: [
       { left: 'INSURANCE', right: '>= +3' },
       { left: '16 v 10', right: '>= 0' },
       { left: '15 v 10', right: '>= +4' },
+      { left: 'T,T v 5', right: '>= +5' },
+      { left: 'T,T v 6', right: '>= +4' },
+      { left: '10 v 10', right: '>= +4' },
+    ],
+  },
+  {
+    title: 'I18 7-12',
+    rows: [
       { left: '12 v 3', right: '>= +2' },
       { left: '12 v 2', right: '>= +3' },
+      { left: '11 v A', right: '>= +1' },
+      { left: '9 v 2', right: '>= +1' },
+      { left: '10 v A', right: '>= +4' },
+      { left: '9 v 7', right: '>= +3' },
+    ],
+  },
+  {
+    title: 'I18 13-18',
+    rows: [
+      { left: '16 v 9', right: '>= +5' },
+      { left: '13 v 2', right: '>= -1' },
+      { left: '12 v 4', right: '>= 0' },
+      { left: '12 v 5', right: '>= -2' },
+      { left: '12 v 6', right: '>= -1' },
+      { left: '13 v 3', right: '>= -2' },
+    ],
+  },
+  {
+    title: 'FAB 4',
+    rows: [
+      { left: '14 v 10', right: '>= +3' },
+      { left: '15 v 10', right: '>= 0' },
+      { left: '15 v 9', right: '>= +2' },
+      { left: '15 v A', right: '>= +1' },
+      { left: 'LATE SURRENDER ONLY' },
+    ],
+  },
+  {
+    title: 'S17 EXTRAS',
+    rows: [
+      { left: 'T,T v 4', right: '>= +6' },
+      { left: 'A,8 v 4', right: '>= +3' },
+      { left: 'A,8 v 5/6', right: '>= +1' },
+      { left: 'A,6 v 2', right: '>= +1' },
+      { left: '16 v 9', right: '>= +4' },
+      { left: '8 v 6', right: '>= +2' },
     ],
   },
 ]

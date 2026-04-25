@@ -6,7 +6,7 @@ import {
   TextContainerUpgrade,
   waitForEvenAppBridge,
 } from '@evenrealities/even_hub_sdk'
-import { type CardBucket, applyBucket, createShoe, undoLast } from './counting'
+import { type CardBucket, type GameSettings, applyBucket, createShoe, undoLast } from './counting'
 import { installCompanionStyles, renderCompanion } from './companion'
 import { type GlassesTextRegion, renderGlassesLayout } from './glassesRender'
 import {
@@ -15,9 +15,13 @@ import {
   cycleDeckIndex,
   cycleGuidePage,
   cycleMenuIndex,
+  cycleSettingsIndex,
   menuItems,
   persistState,
   selectedDeckCount,
+  settingsItems,
+  settingsNotice,
+  updateSetting,
 } from './state'
 
 type EvenBridge = Awaited<ReturnType<typeof waitForEvenAppBridge>>
@@ -212,6 +216,11 @@ function handlePress(): void {
     return
   }
 
+  if (state.mode === 'settings') {
+    updateGameSettings(updateSetting(state.settings, settingsItems[state.selectedSettingsIndex] ?? settingsItems[0]))
+    return
+  }
+
   addSelectedBucket('mid')
 }
 
@@ -261,6 +270,15 @@ function handleSwipe(step: 1 | -1): void {
     return
   }
 
+  if (state.mode === 'settings') {
+    updateState({
+      ...state,
+      selectedSettingsIndex: cycleSettingsIndex(state.selectedSettingsIndex, step),
+      notice: 'Setting selected',
+    })
+    return
+  }
+
   addSelectedBucket(step === -1 ? 'high' : 'low')
 }
 
@@ -293,21 +311,47 @@ function resetCurrentShoe(): void {
   updateState({
     ...state,
     mode: 'count',
-    shoe: createShoe(state.shoe.deckCount),
+    shoe: createShoe(state.settings.deckCount),
     selectedBucket: 'low',
     notice: 'Fresh shoe',
   })
 }
 
 function startFreshShoe(): void {
+  const settings = { ...state.settings, deckCount: selectedDeckCount(state) }
+
   updateState({
     ...state,
     mode: 'count',
-    shoe: createShoe(selectedDeckCount(state)),
+    settings,
+    shoe: createShoe(settings.deckCount),
     selectedBucket: 'low',
     selectedMenuIndex: 0,
+    selectedSettingsIndex: 0,
     guidePage: 0,
     notice: 'Fresh shoe',
+  })
+}
+
+function startShoeFromSettings(): void {
+  updateState({
+    ...state,
+    mode: 'count',
+    shoe: createShoe(state.settings.deckCount),
+    selectedBucket: 'low',
+    selectedMenuIndex: 0,
+    selectedSettingsIndex: 0,
+    guidePage: 0,
+    notice: 'Fresh shoe',
+  })
+}
+
+function updateGameSettings(settings: GameSettings): void {
+  updateState({
+    ...state,
+    settings,
+    selectedDeckIndex: deckIndexFor(settings.deckCount),
+    notice: settingsNotice(settings),
   })
 }
 
@@ -322,12 +366,12 @@ function executeMenuItem(item: (typeof menuItems)[number] | undefined): void {
     case 'New shoe':
       resetCurrentShoe()
       break
-    case 'Change decks':
+    case 'Settings':
       updateState({
         ...state,
-        mode: 'setup',
-        selectedDeckIndex: state.selectedDeckIndex,
-        notice: 'Choose decks',
+        mode: 'settings',
+        selectedSettingsIndex: 0,
+        notice: 'Settings opened',
       })
       break
     case 'Reference':
@@ -376,15 +420,27 @@ function renderAll(): void {
     },
     undo,
     resetShoe: resetCurrentShoe,
-    changeDecks: () => {
-      updateState({ ...state, mode: 'setup', notice: 'Choose decks' })
+    resumeCount: () => {
+      updateState({ ...state, mode: 'count', notice: 'Back to count' })
     },
-    startShoe: startFreshShoe,
-    openGuide: () => {
-      updateState({ ...state, mode: 'guide', guidePage: 0, notice: 'Reference opened' })
+    openSettings: () => {
+      updateState({ ...state, mode: 'settings', selectedSettingsIndex: 0, notice: 'Settings opened' })
     },
-    openMenu: () => {
-      updateState({ ...state, mode: 'menu', selectedMenuIndex: 0, notice: 'Actions opened' })
+    startShoe: () => {
+      if (state.mode === 'setup') {
+        startFreshShoe()
+        return
+      }
+
+      startShoeFromSettings()
+    },
+    openGuide: (guidePage = 0) => {
+      updateState({
+        ...state,
+        mode: 'guide',
+        guidePage,
+        notice: guidePage >= 2 ? 'Plays opened' : 'Reference opened',
+      })
     },
     selectBucket: (bucketIndex) => {
       const bucket = bucketFromIndex(bucketIndex)
@@ -393,6 +449,7 @@ function renderAll(): void {
     setDeckIndex: (deckIndex) => {
       updateState({ ...state, selectedDeckIndex: deckIndex, notice: 'Decks changed' })
     },
+    updateSettings: updateGameSettings,
   })
 
   scheduleGlassesRender()
@@ -482,6 +539,11 @@ function bucketFromIndex(index: number): CardBucket | null {
   if (index === 1) return 'mid'
   if (index === 2) return 'high'
   return null
+}
+
+function deckIndexFor(deckCount: GameSettings['deckCount']): number {
+  const index = [1, 2, 4, 6, 8].indexOf(deckCount)
+  return index === -1 ? 3 : index
 }
 
 function installKeyboardControls(): void {

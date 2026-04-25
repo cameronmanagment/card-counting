@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { applyBucket, createShoe } from '../src/counting'
+import { applyBucket, createShoe, defaultGameSettings } from '../src/counting'
 import { renderGlasses, renderGlassesLayout } from '../src/glassesRender'
 import { menuItems, type AppState } from '../src/state'
 
@@ -13,9 +13,11 @@ function state(overrides: Partial<AppState> = {}): AppState {
   return {
     mode: 'count',
     shoe: createShoe(6, new Date('2026-01-01T00:00:00.000Z')),
+    settings: defaultGameSettings,
     selectedBucket: 'low',
     selectedDeckIndex: 3,
     selectedMenuIndex: 0,
+    selectedSettingsIndex: 0,
     guidePage: 0,
     notice: 'Ready',
     ...overrides,
@@ -141,7 +143,7 @@ describe('glasses renderer', () => {
     expect(output).toContain('Resume count')
     expect(output).toContain('Undo last')
     expect(output).toContain('New shoe')
-    expect(output).toContain('Change decks')
+    expect(output).toContain('Settings')
     expect(output).toContain('Reference')
     expect(output).toContain('Exit')
     expect(output).not.toContain('HI-LO ACTIONS')
@@ -196,6 +198,25 @@ describe('glasses renderer', () => {
     })
   })
 
+  it('renders settings with selected game condition and one event capture', () => {
+    const output = renderGlasses(state({ mode: 'settings', selectedSettingsIndex: 2 }))
+    const layout = renderGlassesLayout(state({ mode: 'settings', selectedSettingsIndex: 2 }))
+    const byName = Object.fromEntries(layout.map((region) => [region.containerName, region]))
+
+    expect(output).toContain('SETTINGS')
+    expect(output).toContain('6D / S17 / DAS / LS')
+    expect(output).toContain('> DOUBLE AFTER SPLIT')
+    expect(output).toContain('LATE SURRENDER')
+    expectFitsGlassesViewport(output)
+    expect(layout).toHaveLength(3)
+    expectOneEventCapture(layout)
+    expect(byName['settings-left']).toMatchObject({ xPosition: 0, yPosition: 0, width: 576, isEventCapture: 0 })
+    expect(byName['settings-right']).toMatchObject({ xPosition: 376, yPosition: 0, width: 200, isEventCapture: 0 })
+    expect(byName['settings-right'].content.split('\n')[0].trim()).toBe('3/4')
+    expect(byName['settings-right'].content.split('\n')[5].trim()).toBe('ON')
+    expect(byName.input).toMatchObject({ xPosition: 0, yPosition: 0, width: 576, height: 288, isEventCapture: 1 })
+  })
+
   it('renders setup across the full glasses width without navigation hints', () => {
     const output = renderGlasses(state({ mode: 'setup' }))
     const lines = output.split('\n')
@@ -234,12 +255,12 @@ describe('glasses renderer', () => {
   })
 
   it('keeps every reference page inside the glasses viewport', () => {
-    const expectedTitles = ['COUNT TABLE', 'TRUE COUNT', 'INDEX DRILLS']
+    const expectedTitles = ['COUNT TABLE', 'TRUE COUNT', 'I18 1-6', 'I18 7-12', 'I18 13-18', 'FAB 4', 'S17 EXTRAS']
 
     expectedTitles.forEach((title, guidePage) => {
       const output = renderGlasses(state({ mode: 'guide', guidePage }))
 
-      expect(output).toContain(`HI-LO REF ${guidePage + 1}/3`)
+      expect(output).toContain(`HI-LO REF ${guidePage + 1}/7`)
       expect(output).toContain(title)
       expect(output).not.toContain('SWIPE PAGE')
       expect(output).not.toContain('TAP BACK')
@@ -252,12 +273,12 @@ describe('glasses renderer', () => {
     const expectedPages = [
       {
         title: 'COUNT TABLE',
-        left: ['HI-LO REF 1/3', 'LOW 2-6', 'MID 7-9', 'HIGH 10-A', '', 'LOG EVERY EXPOSED CARD'],
+        left: ['HI-LO REF 1/7', 'LOW 2-6', 'MID 7-9', 'HIGH 10-A', '', 'LOG EVERY EXPOSED CARD'],
         right: ['COUNT TABLE', '+1', '0', '-1', '', ''],
       },
       {
         title: 'TRUE COUNT',
-        left: ['HI-LO REF 2/3', 'RC', 'DECKS LEFT', 'TC', 'TCi', 'COLD', 'WATCH', 'FAV', 'STRONG'],
+        left: ['HI-LO REF 2/7', 'RC', 'DECKS LEFT', 'TC', 'TCi', 'COLD', 'WATCH', 'FAV', 'STRONG'],
         right: [
           'TRUE COUNT',
           'RUNNING',
@@ -271,9 +292,29 @@ describe('glasses renderer', () => {
         ],
       },
       {
-        title: 'INDEX DRILLS',
-        left: ['HI-LO REF 3/3', 'INSURANCE', '16 v 10', '15 v 10', '12 v 3', '12 v 2'],
-        right: ['INDEX DRILLS', '>= +3', '>= 0', '>= +4', '>= +2', '>= +3'],
+        title: 'I18 1-6',
+        left: ['HI-LO REF 3/7', 'INSURANCE', '16 v 10', '15 v 10', 'T,T v 5', 'T,T v 6', '10 v 10'],
+        right: ['I18 1-6', '>= +3', '>= 0', '>= +4', '>= +5', '>= +4', '>= +4'],
+      },
+      {
+        title: 'I18 7-12',
+        left: ['HI-LO REF 4/7', '12 v 3', '12 v 2', '11 v A', '9 v 2', '10 v A', '9 v 7'],
+        right: ['I18 7-12', '>= +2', '>= +3', '>= +1', '>= +1', '>= +4', '>= +3'],
+      },
+      {
+        title: 'I18 13-18',
+        left: ['HI-LO REF 5/7', '16 v 9', '13 v 2', '12 v 4', '12 v 5', '12 v 6', '13 v 3'],
+        right: ['I18 13-18', '>= +5', '>= -1', '>= 0', '>= -2', '>= -1', '>= -2'],
+      },
+      {
+        title: 'FAB 4',
+        left: ['HI-LO REF 6/7', '14 v 10', '15 v 10', '15 v 9', '15 v A', 'LATE SURRENDER ONLY'],
+        right: ['FAB 4', '>= +3', '>= 0', '>= +2', '>= +1', ''],
+      },
+      {
+        title: 'S17 EXTRAS',
+        left: ['HI-LO REF 7/7', 'T,T v 4', 'A,8 v 4', 'A,8 v 5/6', 'A,6 v 2', '16 v 9', '8 v 6'],
+        right: ['S17 EXTRAS', '>= +6', '>= +3', '>= +1', '>= +1', '>= +4', '>= +2'],
       },
     ]
 

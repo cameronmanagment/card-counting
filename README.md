@@ -24,7 +24,20 @@ Hi-Lo counts cards by group:
 
 ## Built-in reference
 
-The app includes a local Hi-Lo reference table for card tags, true-count cue bands, and a compact set of common index drills. The same material is available in the companion app and through the glasses `Reference` menu.
+The app includes a local Hi-Lo reference table for card tags, true-count cue bands, and the key index-deviation tables. The same material is available in the companion app and through the glasses `Reference` menu.
+
+The deviation reference now includes:
+
+- The full Hi-Lo Illustrious 18 decision table.
+- The Fab 4 late-surrender deviations.
+- Expanded S17 highlights for pair splits, soft totals, hard totals, late surrender, and insurance.
+
+The source assumption for the built-in indexes is Hi-Lo true count, six decks, dealer stands on soft 17, double after split, and late surrender. Those tables are based on the Wizard of Odds High-Low page and the Blackjack Apprenticeship S17 deviation chart. The settings panel lets you set decks, S17/H17, DAS, and late surrender for the shoe you are practicing; if your game differs from the source assumptions, use the settings label as a reminder to recalibrate indexes for that rule set.
+
+Sources:
+
+- Wizard of Odds, Introduction to the High-Low Card Counting Strategy: https://wizardofodds.com/games/blackjack/card-counting/high-low/
+- Blackjack Apprenticeship S17 deviation chart: https://www.blackjackapprenticeship.com/wp-content/uploads/2019/07/BJA_S17.pdf
 
 ## Development
 
