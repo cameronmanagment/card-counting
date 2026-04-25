@@ -18,7 +18,7 @@ import {
   indexReferenceRows,
   matchesIndexAssumptions,
 } from './counting'
-import { type AppState, guidePages, selectedDeckCount } from './state'
+import { type AppState } from './state'
 
 export interface CompanionActions {
   addBucket: (bucketIndex?: number) => void
@@ -179,7 +179,7 @@ function renderActiveSection(section: CompanionSection, state: AppState): string
     case 'setup':
       return renderSetupWorkspace(state)
     case 'reference':
-      return renderReferenceWorkspace(state)
+      return renderReferenceWorkspace()
     case 'plays':
       return renderPlaysWorkspace(state)
     case 'count':
@@ -273,9 +273,6 @@ function renderCountWorkspace(state: AppState): string {
         </section>
       </section>
 
-      <aside class="side-surface" aria-label="Current state">
-        ${renderModePanel(state)}
-      </aside>
     </div>
   `
 }
@@ -288,10 +285,9 @@ function renderSetupWorkspace(state: AppState): string {
   `
 }
 
-function renderReferenceWorkspace(state: AppState): string {
+function renderReferenceWorkspace(): string {
   return `
     <div class="count-workspace reference-workspace">
-      ${state.mode === 'guide' ? renderModePanel(state) : ''}
       ${renderCountTable()}
     </div>
   `
@@ -500,7 +496,9 @@ export function installCompanionStyles(): void {
     }
 
     .count-workspace-count {
-      grid-template-columns: minmax(0, 1fr) minmax(270px, 320px);
+      width: min(920px, 100%);
+      grid-template-columns: 1fr;
+      margin: 0 auto;
     }
 
     .setup-workspace {
@@ -515,8 +513,7 @@ export function installCompanionStyles(): void {
       margin: 0 auto;
     }
 
-    .count-console,
-    .side-surface {
+    .count-console {
       display: grid;
       gap: 12px;
       min-width: 0;
@@ -1242,9 +1239,6 @@ export function installCompanionStyles(): void {
         grid-template-columns: 1fr;
       }
 
-      .side-surface {
-        order: -1;
-      }
     }
 
     @media (max-width: 640px) {
@@ -1399,91 +1393,6 @@ function renderBucketButton(bucket: CardBucket, index: number, selectedBucket: C
       <span class="bucket-meta">${countReferenceRows.find((row) => row.bucket === bucket)?.cards ?? ''}</span>
       <strong class="bucket-delta tone-${bucket}">${signed(bucketDeltas[bucket])}</strong>
     </button>
-  `
-}
-
-function renderModePanel(state: AppState): string {
-  if (state.mode === 'setup') {
-    return renderDeckSetupPanel(state)
-  }
-
-  if (state.mode === 'guide') {
-    return `
-      <section class="device-panel">
-        <div class="panel-heading">
-          <div>
-            <span>Device state</span>
-            <h2>Glasses reference</h2>
-          </div>
-          <strong>${state.guidePage + 1}/${guidePages.length}</strong>
-        </div>
-        <pre class="device-pre">${guidePages[state.guidePage]?.join('\n') ?? ''}</pre>
-      </section>
-    `
-  }
-
-  if (state.mode === 'settings') {
-    return renderSettingsPanel(state)
-  }
-
-  const lastBucket = state.shoe.history.at(-1)
-
-  return `
-    <section class="device-panel">
-      <div class="panel-heading">
-        <div>
-          <span>Device state</span>
-          <h2>Count mode</h2>
-        </div>
-        <strong>${state.shoe.deckCount} decks</strong>
-      </div>
-      <dl class="device-list">
-        <div>
-          <dt><span>Selected</span></dt>
-          <dd>${bucketLabels[state.selectedBucket]}</dd>
-        </div>
-        <div>
-          <dt><span>Last entry</span></dt>
-          <dd>${lastBucket ? bucketLabels[lastBucket] : '-'}</dd>
-        </div>
-        <div>
-          <dt><span>Notice</span></dt>
-          <dd>${state.notice}</dd>
-        </div>
-        <div>
-          <dt><span>Rules</span></dt>
-          <dd>${formatGameSettings(state.settings)}</dd>
-        </div>
-      </dl>
-    </section>
-  `
-}
-
-function renderDeckSetupPanel(state: AppState): string {
-  return `
-    <section class="device-panel">
-      <div class="panel-heading">
-        <div>
-          <span>Setup</span>
-          <h2>Deck setup</h2>
-        </div>
-        <strong>${selectedDeckCount(state)} decks</strong>
-      </div>
-      <div class="deck-row">
-        <label for="deck-select">
-          Decks in shoe
-          <select id="deck-select" data-deck-select>
-            ${[1, 2, 4, 6, 8]
-              .map((deckCount, index) => {
-                const selected = deckCount === selectedDeckCount(state) ? ' selected' : ''
-                return `<option value="${index}"${selected}>${deckCount}</option>`
-              })
-              .join('')}
-          </select>
-        </label>
-        <button class="primary-action" data-action="start">Start shoe</button>
-      </div>
-    </section>
   `
 }
 
