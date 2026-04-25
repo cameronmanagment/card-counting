@@ -1,43 +1,76 @@
 # Hi-Lo Count
 
-Hi-Lo Count is a blackjack card-counting trainer for Even Realities G2 glasses and Even Hub. It uses the Hi-Lo system with a modern companion console and a small, glanceable G2 interface:
+Hi-Lo Count is a practice app for learning the basic Hi-Lo blackjack card-counting system on Even Realities G2 glasses, in Even Hub, or in a normal browser. It is meant for training and simulation: you watch cards appear in a practice shoe, enter each card by group, and the app keeps the running count, estimated true count, cards seen, decks remaining, and a short history of your latest inputs.
 
-- Swipe up to log `HIGH 10-A`.
-- Tap to log `MID 7-9`.
+If you have never counted cards before, start here: Hi-Lo does not ask you to remember every card individually. Each exposed card belongs to one of three groups:
+
+- `LOW 2-6`: adds `+1` to the running count.
+- `MID 7-9`: adds `0`, but still counts as a seen card.
+- `HIGH 10-A`: adds `-1` to the running count.
+
+The goal of practice is to build the habit of tagging every exposed card quickly and accurately. Low cards increase the count, high cards decrease it, and middle cards keep deck estimation honest.
+
+## What You See
+
+On the glasses, the main screen is intentionally small and glanceable:
+
+- `SEEN` shows how many cards have been entered out of the shoe.
+- `RC` is the running count, the simple total from the cards you entered.
+- `TCi` is an integer true count estimate, which adjusts the running count by decks remaining.
+- `LAST` shows the latest few card groups you entered. The newest one is underlined.
+- The right side shows the count cue, true count, decks left, and shoe penetration.
+- The bottom line shows the direct inputs for low, middle, and high cards.
+
+The companion browser app shows the same shoe with larger controls, history, settings, and reference tables. You can use the companion by itself, the glasses by themselves after launch, or both together. They mirror the same local shoe state.
+
+## Glasses Controls
+
+Use one input for every exposed card:
+
 - Swipe down to log `LOW 2-6`.
+- Tap to log `MID 7-9`.
+- Swipe up to log `HIGH 10-A`.
 - Double tap to open the action menu.
-- Use the menu to resume, undo, reset the shoe, change decks, open the reference table, or exit the app.
 
-The companion app and the glasses both run from the same local counting engine. The companion can be used by itself in a browser, the glasses can be used by themselves once launched, and together they mirror the same shoe state.
+In the menu you can resume counting, undo the last input, start a new shoe, change settings, open the learning pages, open the reference table, or exit.
 
-The app is designed for lawful personal practice and simulation. Do not use it where electronic assistance, card counting aids, or wearable devices are prohibited.
+## First Practice Session
 
-## Why the input is bucketed
+1. Start a new shoe and choose the number of decks you want to practice.
+2. Look at one card at a time from a real deck, a dealing app, or a practice drill.
+3. Enter the card group on the glasses or in the companion app.
+4. Check `LAST` to confirm the input was recorded.
+5. Watch `RC` change as you enter low and high cards.
+6. Keep entering middle cards too, even though they are worth `0`.
+7. Use `Undo last` if you make a mistake.
+8. Reset with `New shoe` when you want a fresh practice round.
 
-Hi-Lo counts cards by group:
+At first, ignore strategy deviations and focus only on entering the correct group for each card. Once that feels natural, start watching the true count and reference pages.
 
-- `2-6`: +1 running count
-- `7-9`: 0 running count
-- `10-A`: -1 running count
+## Why Middle Cards Matter
 
-`MID` cards still need to be entered so decks remaining, shoe penetration, and true count stay accurate.
+It is tempting to skip `7`, `8`, and `9` because they do not change the running count. Do not skip them during practice. The app needs every seen card to estimate decks remaining, penetration, and true count. If you only enter cards that change the count, the true count will become misleading.
 
-## Built-in reference
+## Built-In Reference
 
-The app includes a local Hi-Lo reference table for card tags, true-count cue bands, and the key index-deviation tables. The same material is available in the companion app and through the glasses `Reference` menu.
+The app includes local reference pages for:
 
-The deviation reference now includes:
-
-- The full Hi-Lo Illustrious 18 decision table.
+- Hi-Lo card tags.
+- True-count cue bands.
+- The Illustrious 18 decision table.
 - The Fab 4 late-surrender deviations.
-- Expanded S17 highlights for pair splits, soft totals, hard totals, late surrender, and insurance.
+- Expanded S17 highlights for pair splits, soft totals, hard totals, surrender, and insurance.
 
-The source assumption for the built-in indexes is Hi-Lo true count, six decks, dealer stands on soft 17, double after split, and late surrender. Those tables are based on the Wizard of Odds High-Low page and the Blackjack Apprenticeship S17 deviation chart. The settings panel lets you set decks, S17/H17, DAS, and late surrender for the shoe you are practicing; if your game differs from the source assumptions, use the settings label as a reminder to recalibrate indexes for that rule set.
+The built-in deviation tables assume Hi-Lo true count, six decks, dealer stands on soft 17, double after split, and late surrender. You can change the practice settings for decks, S17/H17, double after split, and late surrender, but if your real game uses different rules, treat the settings label as a reminder that index numbers may need recalibration.
 
 Sources:
 
 - Wizard of Odds, Introduction to the High-Low Card Counting Strategy: https://wizardofodds.com/games/blackjack/card-counting/high-low/
 - Blackjack Apprenticeship S17 deviation chart: https://www.blackjackapprenticeship.com/wp-content/uploads/2019/07/BJA_S17.pdf
+
+## Responsible Use
+
+This app is for lawful personal practice and simulation. Do not use it in any casino, game, or setting where electronic assistance, card-counting aids, or wearable devices are prohibited.
 
 ## Development
 
