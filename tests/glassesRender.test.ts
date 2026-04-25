@@ -61,16 +61,17 @@ describe('glasses renderer', () => {
     const output = renderGlasses(state({ shoe, selectedBucket: 'high' }))
     const lines = output.split('\n')
 
-    expect(output).toContain('HI-LO HUD')
+    expect(output).not.toContain('HI-LO HUD')
     expect(output).toContain('RC: 0')
     expect(output).toContain('TCi: 0')
     expect(output).toContain('SEEN: 2/312')
     expect(output).toContain('LAST: L H')
-    expect(output).toContain('TRUE 0.0')
-    expect(output).toContain('LEFT 6.0D')
-    expect(output).toContain('PEN 1%')
+    expect(output).toContain('TRUE: 0.0')
+    expect(output).toContain('LEFT: 6.0D')
+    expect(output).toContain('PEN: 1%')
     expect(output).not.toContain('INPUT')
-    expect(output).toContain('Ready')
+    expect(output).not.toContain('Ready')
+    expect(output).not.toContain('LOGGED')
     expect(output).toContain(`<${upIcon} HIGH -1>`)
     expect(output).toContain('TAP MID 0')
     expect(output).toContain(`${downIcon} LOW +1`)
@@ -78,11 +79,11 @@ describe('glasses renderer', () => {
     expect(output.indexOf('TAP MID 0')).toBeLessThan(output.indexOf(`<${upIcon} HIGH -1>`))
     expect(output).not.toContain('DBL ACTIONS')
     expect(lines).toHaveLength(countDisplayLines)
+    expect(lines[0]).toContain('SEEN: 2/312')
     expect(lines[1]).toBe('')
     expect(lines[6]).toBe('')
-    expect(lines[5]).toContain('LAST: L H')
-    expect(lines[5].trimEnd().endsWith('Ready')).toBe(true)
-    expect(lines[5].indexOf('Ready')).toBeGreaterThan(45)
+    expect(lines[4]).toContain('LAST: L H')
+    expect(lines[5]).toBe('')
     expect(lines[7].indexOf(`${downIcon} LOW +1`)).toBeGreaterThan(5)
     expectFitsGlassesViewport(output)
   })
@@ -92,7 +93,7 @@ describe('glasses renderer', () => {
     const layout = renderGlassesLayout(state({ shoe, selectedBucket: 'high', notice: 'HIGH logged' }))
     const byName = Object.fromEntries(layout.map((region) => [region.containerName, region]))
 
-    expect(layout).toHaveLength(8)
+    expect(layout).toHaveLength(7)
     expectOneEventCapture(layout)
     expect(byName.left).toMatchObject({ xPosition: 0, yPosition: 0, width: 360, height: 196 })
     expect(byName.left.isEventCapture).toBe(0)
@@ -100,15 +101,12 @@ describe('glasses renderer', () => {
     expect(byName.r0.xPosition).toBe(byName.r1.xPosition)
     expect(byName.r1.xPosition).toBe(byName.r2.xPosition)
     expect(byName.r2.xPosition).toBe(byName.r3.xPosition)
-    expect(byName.r3.xPosition).toBe(byName.rail.xPosition)
     expect(byName.r0.xPosition + byName.r0.width).toBe(576)
     expect(byName.r1.xPosition).toBeGreaterThanOrEqual(360)
     expect(byName.r1.yPosition).toBe(56)
-    expect(byName.rail.yPosition).toBe(140)
-    expect(byName.rail.xPosition + byName.rail.width).toBe(byName.r3.xPosition + byName.r3.width)
+    expect(byName.rail).toBeUndefined()
     expect(byName.actions.xPosition).toBeGreaterThan(100)
-    expect(byName.r1.content).toContain('TRUE 0.0')
-    expect(byName.rail.content.trim()).toBe('HIGH LOGGED')
+    expect(byName.r1.content).toContain('TRUE: 0.0')
     expect(byName.actions.content).toContain(`${downIcon} LOW +1 | TAP MID 0 | <${upIcon} HIGH -1>`)
   })
 
@@ -123,7 +121,7 @@ describe('glasses renderer', () => {
     const grownLayout = renderGlassesLayout(state({ shoe: grownShoe, selectedBucket: 'low', notice: 'LOW logged' }))
     const baseByName = Object.fromEntries(baseLayout.map((region) => [region.containerName, region]))
     const grownByName = Object.fromEntries(grownLayout.map((region) => [region.containerName, region]))
-    const rightRegionNames = ['r0', 'r1', 'r2', 'r3', 'rail']
+    const rightRegionNames = ['r0', 'r1', 'r2', 'r3']
 
     rightRegionNames.forEach((name) => {
       expect(grownByName[name].xPosition).toBe(baseByName[name].xPosition)
@@ -131,7 +129,7 @@ describe('glasses renderer', () => {
       expect(grownByName[name].content.trimStart()).toBe(grownByName[name].content.trim())
     })
 
-    expect(grownByName.r1.content.trim()).toContain('TRUE +')
+    expect(grownByName.r1.content.trim()).toContain('TRUE: +')
     expect(grownByName.r1.content.length).toBeGreaterThan(grownByName.r1.content.trimStart().length)
   })
 
@@ -198,15 +196,41 @@ describe('glasses renderer', () => {
     })
   })
 
-  it('keeps setup navigation clear on the glasses', () => {
+  it('renders setup across the full glasses width without navigation hints', () => {
     const output = renderGlasses(state({ mode: 'setup' }))
+    const lines = output.split('\n')
 
     expect(output).toContain('HI-LO SETUP')
     expect(output).toContain('SHOE SIZE')
     expect(output).toContain('<< 6D SHOE >>')
-    expect(output).toContain('SWIPE SIZE')
-    expect(output).toContain('TAP START')
+    expect(output).not.toContain('SWIPE SIZE')
+    expect(output).not.toContain('TAP START')
+    expect(output).not.toContain('DBL BACK')
+    expect(lines[0]).toMatch(/^HI-LO SETUP\s+DECKS$/)
+    expect(lines[2]).toMatch(/^SHOE SIZE\s+<< 6D SHOE >>$/)
     expectFitsGlassesViewport(output)
+  })
+
+  it('captures setup navigation without making setup text scrollable', () => {
+    const layout = renderGlassesLayout(state({ mode: 'setup' }))
+    const byName = Object.fromEntries(layout.map((region) => [region.containerName, region]))
+
+    expect(layout).toHaveLength(2)
+    expectOneEventCapture(layout)
+    expect(byName.setup).toMatchObject({
+      xPosition: 0,
+      yPosition: 0,
+      width: 576,
+      isEventCapture: 0,
+    })
+    expect(byName.input).toMatchObject({
+      xPosition: 0,
+      yPosition: 0,
+      width: 576,
+      height: 288,
+      content: ' ',
+      isEventCapture: 1,
+    })
   })
 
   it('keeps every reference page inside the glasses viewport', () => {

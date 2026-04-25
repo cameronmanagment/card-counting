@@ -46,6 +46,7 @@ export function renderGlassesLayout(state: AppState): GlassesTextRegion[] {
   if (state.mode === 'count') return renderCountLayout(state)
   if (state.mode === 'menu') return renderMenuLayout(state)
   if (state.mode === 'guide') return renderGuideLayout(state)
+  if (state.mode === 'setup') return renderSetupLayout(state)
 
   return [
     textRegion({
@@ -61,17 +62,40 @@ export function renderGlassesLayout(state: AppState): GlassesTextRegion[] {
   ]
 }
 
+function renderSetupLayout(state: AppState): GlassesTextRegion[] {
+  const content = renderSetup(state)
+
+  return [
+    textRegion({
+      id: 1,
+      name: 'setup',
+      x: 0,
+      y: 0,
+      width: canvasWidth,
+      height: content.split('\n').length * lineHeight,
+      content,
+    }),
+    textRegion({
+      id: 8,
+      name: 'input',
+      x: 0,
+      y: 0,
+      width: canvasWidth,
+      height: canvasHeight,
+      content: ' ',
+      capture: true,
+    }),
+  ]
+}
+
 function renderSetup(state: AppState): string {
-  return page([
-    leftRight('HI-LO SETUP', 'DECKS'),
-    center('SHOE SIZE'),
-    center(`<< ${selectedDeckCount(state)}D SHOE >>`),
+  return pageLines([
+    leftRight('HI-LO SETUP', 'DECKS', fullDisplayWidth),
     '',
-    leftRight('SWIPE SIZE', 'TAP START'),
-    leftRight('DBL BACK', ''),
+    leftRight('SHOE SIZE', `<< ${selectedDeckCount(state)}D SHOE >>`, fullDisplayWidth),
     '',
-    center('PRACTICE ONLY'),
-  ])
+    leftRight('PRACTICE ONLY', '', fullDisplayWidth),
+  ], fullDisplayWidth)
 }
 
 function renderCount(state: AppState): string {
@@ -79,7 +103,7 @@ function renderCount(state: AppState): string {
 }
 
 function renderCountLayout(state: AppState): GlassesTextRegion[] {
-  const { leftLines, rightLines, statusLine, actionLine } = renderCountParts(state)
+  const { leftLines, rightLines, actionLine } = renderCountParts(state)
 
   return [
     textRegion({
@@ -94,10 +118,9 @@ function renderCountLayout(state: AppState): GlassesTextRegion[] {
     ...rightLines.map((line, index) =>
       rightTextRegion(line, index === 0 ? 0 : index + 1, 2 + index, `r${index}`),
     ),
-    rightTextRegion(statusLine, 5, 6, 'rail'),
-    centeredTextRegion(7, 'actions', actionLine, 206, 34),
+    centeredTextRegion(6, 'actions', actionLine, 206, 34),
     textRegion({
-      id: 8,
+      id: 7,
       name: 'input',
       x: 0,
       y: 0,
@@ -110,7 +133,7 @@ function renderCountLayout(state: AppState): GlassesTextRegion[] {
 }
 
 function renderCountLines(state: AppState): string[] {
-  const { leftLines, rightLines, statusLine, actionLine } = renderCountParts(state)
+  const { leftLines, rightLines, actionLine } = renderCountParts(state)
 
   return [
     leftRight(leftLines[0], rightLines[0]),
@@ -118,7 +141,7 @@ function renderCountLines(state: AppState): string[] {
     leftRight(leftLines[2], rightLines[1]),
     leftRight(leftLines[3], rightLines[2]),
     leftRight(leftLines[4], rightLines[3]),
-    leftRight(leftLines[5], statusLine, fullDisplayWidth),
+    leftLines[5],
     leftLines[6],
     fullCenter(actionLine),
   ]
@@ -127,30 +150,27 @@ function renderCountLines(state: AppState): string[] {
 function renderCountParts(state: AppState): {
   leftLines: string[]
   rightLines: string[]
-  statusLine: string
   actionLine: string
 } {
   const stats = getShoeStats(state.shoe)
   const lastCards = state.shoe.history.slice(-6).map((bucket) => bucketShortLabels[bucket]).join(' ')
-  const statusLine = state.notice.endsWith('logged') ? state.notice.toUpperCase() : 'Ready'
 
   return {
     leftLines: [
-      'HI-LO HUD',
+      `SEEN: ${state.shoe.cardsSeen}/${stats.totalCards}`,
       '',
       `RC: ${signed(state.shoe.runningCount)}`,
       `TCi: ${signed(stats.indexTrueCount)}`,
-      `SEEN: ${state.shoe.cardsSeen}/${stats.totalCards}`,
       `LAST: ${lastCards || '-'}`,
+      '',
       '',
     ],
     rightLines: [
       stats.cue.toUpperCase(),
-      `TRUE ${signedDecimal(stats.trueCount)}`,
-      `LEFT ${formatDecimal(stats.decksRemaining)}D`,
-      `PEN ${Math.round(stats.penetrationPct)}%`,
+      `TRUE: ${signedDecimal(stats.trueCount)}`,
+      `LEFT: ${formatDecimal(stats.decksRemaining)}D`,
+      `PEN: ${Math.round(stats.penetrationPct)}%`,
     ],
-    statusLine,
     actionLine: directInputLine(state.selectedBucket),
   }
 }
@@ -286,10 +306,6 @@ function leftRight(left: string, right: string, width = displayWidth): string {
   const fittedRight = fit(right, width)
   const gap = Math.max(width - fittedLeft.length - fittedRight.length, 1)
   return `${fittedLeft}${' '.repeat(gap)}${fittedRight}`.slice(0, width)
-}
-
-function center(value: string): string {
-  return centerWithin(value, displayWidth).trimEnd()
 }
 
 function fullCenter(value: string): string {
