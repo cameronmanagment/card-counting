@@ -5,7 +5,15 @@ import {
   formatGameSettings,
   getShoeStats,
 } from './counting'
-import { type AppState, guidePages, menuItems, selectedDeckCount, settingValueLabel, settingsItems } from './state'
+import {
+  type AppState,
+  guidePages,
+  learnPages,
+  menuItems,
+  selectedDeckCount,
+  settingValueLabel,
+  settingsItems,
+} from './state'
 
 const displayWidth = 48
 const fullDisplayWidth = 58
@@ -37,6 +45,8 @@ export function renderGlasses(state: AppState): string {
       return renderMenu(state)
     case 'guide':
       return renderGuide(state)
+    case 'learn':
+      return renderLearn(state)
     case 'settings':
       return renderSettings(state)
     case 'count':
@@ -49,6 +59,7 @@ export function renderGlassesLayout(state: AppState): GlassesTextRegion[] {
   if (state.mode === 'count') return renderCountLayout(state)
   if (state.mode === 'menu') return renderMenuLayout(state)
   if (state.mode === 'guide') return renderGuideLayout(state)
+  if (state.mode === 'learn') return renderLearnLayout(state)
   if (state.mode === 'settings') return renderSettingsLayout(state)
   if (state.mode === 'setup') return renderSetupLayout(state)
 
@@ -182,7 +193,6 @@ function renderCountParts(state: AppState): {
 function renderMenu(state: AppState): string {
   return page(
     [
-    '',
     '',
     ...menuItems.map((item, index) => menuLine(item, index === state.selectedMenuIndex)),
     '',
@@ -329,12 +339,66 @@ function renderGuideLayout(state: AppState): GlassesTextRegion[] {
   ]
 }
 
+function renderLearn(state: AppState): string {
+  return pageLines(
+    learnRowsFor(state).map((row) =>
+      row.right === undefined ? row.left : leftRight(row.left, row.right, fullDisplayWidth),
+    ),
+    fullDisplayWidth,
+  )
+}
+
+function renderLearnLayout(state: AppState): GlassesTextRegion[] {
+  const rows = learnRowsFor(state)
+
+  return [
+    textRegion({
+      id: 1,
+      name: 'learn-left',
+      x: 0,
+      y: 0,
+      width: canvasWidth,
+      height: rows.length * lineHeight,
+      content: rows.map((row) => row.left).join('\n'),
+    }),
+    textRegion({
+      id: 2,
+      name: 'learn-right',
+      x: guideRightColumnX,
+      y: 0,
+      width: canvasWidth - guideRightColumnX,
+      height: rows.length * lineHeight,
+      content: rows.map((row) => row.right ?? '').join('\n'),
+    }),
+    textRegion({
+      id: 8,
+      name: 'input',
+      x: 0,
+      y: 0,
+      width: canvasWidth,
+      height: canvasHeight,
+      content: ' ',
+      capture: true,
+    }),
+  ]
+}
+
 function guideRowsFor(state: AppState): GuideRow[] {
   const page = compactGuidePages[state.guidePage] ?? compactGuidePages[0]
 
   return [
     { left: `HI-LO REF ${state.guidePage + 1}/${guidePages.length}`, right: page.title },
     ...page.rows,
+  ]
+}
+
+function learnRowsFor(state: AppState): GuideRow[] {
+  const page = learnPages[state.learnPage] ?? learnPages[0]
+
+  return [
+    { left: `LEARN ${state.learnPage + 1}/${learnPages.length}`, right: page.title },
+    { left: '' },
+    ...page.rows.map((row) => ({ left: row })),
   ]
 }
 

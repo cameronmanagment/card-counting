@@ -19,6 +19,7 @@ function state(overrides: Partial<AppState> = {}): AppState {
     selectedMenuIndex: 0,
     selectedSettingsIndex: 0,
     guidePage: 0,
+    learnPage: 0,
     notice: 'Ready',
     ...overrides,
   }
@@ -138,6 +139,7 @@ describe('glasses renderer', () => {
     expect(output).toContain('Undo last')
     expect(output).toContain('New shoe')
     expect(output).toContain('Settings')
+    expect(output).toContain('Learn')
     expect(output).toContain('Reference')
     expect(output).toContain('Exit')
     expect(output).not.toContain('HI-LO ACTIONS')
@@ -146,11 +148,11 @@ describe('glasses renderer', () => {
     expect(output).not.toContain('DBL RESUME')
     expect(output).not.toContain('Double system exit')
     expect(lines).toHaveLength(centeredMenuLines)
-    expect(lines.slice(0, 2).every((line) => line === '')).toBe(true)
-    expect(menuLines).toHaveLength(6)
+    expect(lines[0]).toBe('')
+    expect(menuLines).toHaveLength(7)
     expect(menuLines[0].indexOf('Resume count')).toBeGreaterThanOrEqual(20)
     expect(menuLines[0].indexOf('>')).toBe(menuLines[0].indexOf('Resume count') - 3)
-    expect(menuLines[5].indexOf('Exit')).toBeGreaterThan(menuLines[0].indexOf('Resume count'))
+    expect(menuLines[6].indexOf('Exit')).toBeGreaterThan(menuLines[0].indexOf('Resume count'))
     expectFitsGlassesViewport(output)
   })
 
@@ -178,7 +180,7 @@ describe('glasses renderer', () => {
     expectOneEventCapture(firstLayout)
     expectOneEventCapture(laterLayout)
     expect(firstByName.input).toMatchObject({ xPosition: 0, yPosition: 0, width: 576, height: 288, isEventCapture: 1 })
-    expect(firstByName['menu-list']).toMatchObject({ xPosition: 0, yPosition: 60, width: 576, height: 168 })
+    expect(firstByName['menu-list']).toMatchObject({ xPosition: 0, yPosition: 46, width: 576, height: 196 })
     expect(laterByName['menu-list']).toMatchObject({
       xPosition: firstByName['menu-list'].xPosition,
       yPosition: firstByName['menu-list'].yPosition,
@@ -211,6 +213,24 @@ describe('glasses renderer', () => {
     expect(byName['settings-right']).toMatchObject({ xPosition: 376, yPosition: 0, width: 200, isEventCapture: 0 })
     expect(byName['settings-right'].content.split('\n')[0].trim()).toBe('3/4')
     expect(byName['settings-right'].content.split('\n')[5].trim()).toBe('ON')
+    expect(byName.input).toMatchObject({ xPosition: 0, yPosition: 0, width: 576, height: 288, isEventCapture: 1 })
+  })
+
+  it('renders concise learn pages on the glasses', () => {
+    const output = renderGlasses(state({ mode: 'learn', learnPage: 3 }))
+    const layout = renderGlassesLayout(state({ mode: 'learn', learnPage: 3 }))
+    const byName = Object.fromEntries(layout.map((region) => [region.containerName, region]))
+
+    expect(output).toContain('LEARN 4/5')
+    expect(output).toContain('USE THE APP')
+    expect(output).toContain('Swipe up for high cards.')
+    expect(output).toContain('Double tap opens the menu.')
+    expectFitsGlassesViewport(output)
+    expect(layout).toHaveLength(3)
+    expectOneEventCapture(layout)
+    expect(byName['learn-left']).toMatchObject({ xPosition: 0, yPosition: 0, width: 576, height: 168 })
+    expect(byName['learn-right']).toMatchObject({ xPosition: 410, yPosition: 0, width: 166, height: 168 })
+    expect(byName['learn-right'].content.split('\n')[0]).toBe('USE THE APP')
     expect(byName.input).toMatchObject({ xPosition: 0, yPosition: 0, width: 576, height: 288, isEventCapture: 1 })
   })
 

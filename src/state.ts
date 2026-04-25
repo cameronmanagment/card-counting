@@ -11,7 +11,7 @@ import {
   normalizeDeckCount,
 } from './counting'
 
-export type AppMode = 'setup' | 'count' | 'menu' | 'guide' | 'settings'
+export type AppMode = 'setup' | 'count' | 'menu' | 'guide' | 'settings' | 'learn'
 
 export interface AppState {
   mode: AppMode
@@ -22,10 +22,11 @@ export interface AppState {
   selectedMenuIndex: number
   selectedSettingsIndex: number
   guidePage: number
+  learnPage: number
   notice: string
 }
 
-export const menuItems = ['Resume count', 'Undo last', 'New shoe', 'Settings', 'Reference', 'Exit'] as const
+export const menuItems = ['Resume count', 'Undo last', 'New shoe', 'Settings', 'Learn', 'Reference', 'Exit'] as const
 export const settingsItems = ['Decks', 'Dealer soft 17', 'Double after split', 'Late surrender'] as const
 
 export type MenuItem = (typeof menuItems)[number]
@@ -54,6 +55,7 @@ export function createInitialState(): AppState {
     selectedMenuIndex: 0,
     selectedSettingsIndex: 0,
     guidePage: 0,
+    learnPage: 0,
     notice: persisted ? 'Shoe restored' : 'Choose decks',
   }
 }
@@ -97,6 +99,58 @@ export function cycleSettingsIndex(index: number, step: 1 | -1): number {
 export function cycleGuidePage(page: number, step: 1 | -1): number {
   return wrapIndex(page + step, guidePages.length)
 }
+
+export function cycleLearnPage(page: number, step: 1 | -1): number {
+  return wrapIndex(page + step, learnPages.length)
+}
+
+export const learnPages = [
+  {
+    title: 'CARD COUNTING',
+    rows: [
+      'Counting tracks the mix of cards left.',
+      'Low cards help the dealer.',
+      'High cards help the player.',
+      'Hi-Lo adds one simple tag per card.',
+    ],
+  },
+  {
+    title: 'HI-LO TAGS',
+    rows: [
+      '2-6 add +1.',
+      '7-9 add 0.',
+      '10-A subtract 1.',
+      'Running count is the live total.',
+    ],
+  },
+  {
+    title: 'TRUE COUNT',
+    rows: [
+      'Divide running count by decks left.',
+      'Use TCi for index plays.',
+      'Higher true counts favor the player.',
+      'Reset at the start of each shoe.',
+    ],
+  },
+  {
+    title: 'USE THE APP',
+    rows: [
+      'Swipe up for high cards.',
+      'Tap for mid cards.',
+      'Swipe down for low cards.',
+      'Double tap opens the menu.',
+    ],
+  },
+  {
+    title: 'PRACTICE FLOW',
+    rows: [
+      'Set decks and rules first.',
+      'Log every exposed card.',
+      'Use Ref for tags and true count.',
+      'Use Plays for index decisions.',
+    ],
+  },
+]
 
 export const guidePages = [
   [

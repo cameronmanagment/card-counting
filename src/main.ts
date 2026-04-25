@@ -14,6 +14,7 @@ import {
   createInitialState,
   cycleDeckIndex,
   cycleGuidePage,
+  cycleLearnPage,
   cycleMenuIndex,
   cycleSettingsIndex,
   menuItems,
@@ -216,6 +217,15 @@ function handlePress(): void {
     return
   }
 
+  if (state.mode === 'learn') {
+    updateState({
+      ...state,
+      mode: 'count',
+      notice: 'Learn closed',
+    })
+    return
+  }
+
   if (state.mode === 'settings') {
     updateGameSettings(updateSetting(state.settings, settingsItems[state.selectedSettingsIndex] ?? settingsItems[0]))
     return
@@ -266,6 +276,15 @@ function handleSwipe(step: 1 | -1): void {
       ...state,
       guidePage: cycleGuidePage(state.guidePage, step),
       notice: 'Reference page changed',
+    })
+    return
+  }
+
+  if (state.mode === 'learn') {
+    updateState({
+      ...state,
+      learnPage: cycleLearnPage(state.learnPage, step),
+      notice: 'Learn page changed',
     })
     return
   }
@@ -329,6 +348,7 @@ function startFreshShoe(): void {
     selectedMenuIndex: 0,
     selectedSettingsIndex: 0,
     guidePage: 0,
+    learnPage: 0,
     notice: 'Fresh shoe',
   })
 }
@@ -342,6 +362,7 @@ function startShoeFromSettings(): void {
     selectedMenuIndex: 0,
     selectedSettingsIndex: 0,
     guidePage: 0,
+    learnPage: 0,
     notice: 'Fresh shoe',
   })
 }
@@ -372,6 +393,14 @@ function executeMenuItem(item: (typeof menuItems)[number] | undefined): void {
         mode: 'settings',
         selectedSettingsIndex: 0,
         notice: 'Settings opened',
+      })
+      break
+    case 'Learn':
+      updateState({
+        ...state,
+        mode: 'learn',
+        learnPage: 0,
+        notice: 'Learn opened',
       })
       break
     case 'Reference':
@@ -425,6 +454,9 @@ function renderAll(): void {
     },
     openSettings: () => {
       updateState({ ...state, mode: 'settings', selectedSettingsIndex: 0, notice: 'Settings opened' })
+    },
+    openLearn: (learnPage = 0) => {
+      updateState({ ...state, mode: 'learn', learnPage, notice: 'Learn opened' })
     },
     startShoe: () => {
       if (state.mode === 'setup') {

@@ -18,7 +18,7 @@ import {
   indexReferenceRows,
   matchesIndexAssumptions,
 } from './counting'
-import { type AppState } from './state'
+import { type AppState, learnPages } from './state'
 
 export interface CompanionActions {
   addBucket: (bucketIndex?: number) => void
@@ -26,6 +26,7 @@ export interface CompanionActions {
   resetShoe: () => void
   resumeCount: () => void
   openSettings: () => void
+  openLearn: (learnPage?: number) => void
   startShoe: () => void
   openGuide: (guidePage?: number) => void
   selectBucket: (bucketIndex: number) => void
@@ -33,11 +34,12 @@ export interface CompanionActions {
   updateSettings: (settings: GameSettings) => void
 }
 
-type CompanionSection = 'count' | 'setup' | 'reference' | 'plays'
+type CompanionSection = 'count' | 'setup' | 'learn' | 'reference' | 'plays'
 
 const companionSections: Array<{ id: CompanionSection; label: string; detail: string }> = [
   { id: 'count', label: 'Count', detail: 'Live' },
   { id: 'setup', label: 'Setup', detail: 'Rules' },
+  { id: 'learn', label: 'Learn', detail: 'Basics' },
   { id: 'reference', label: 'Ref', detail: 'Tags' },
   { id: 'plays', label: 'Plays', detail: 'Indexes' },
 ]
@@ -132,6 +134,7 @@ export function renderCompanion(root: HTMLElement, state: AppState, actions: Com
 
 function getActiveCompanionSection(state: AppState): CompanionSection {
   if (state.mode === 'setup' || state.mode === 'settings') return 'setup'
+  if (state.mode === 'learn') return 'learn'
   if (state.mode === 'guide') return state.guidePage >= 2 ? 'plays' : 'reference'
   if (state.mode === 'count') return 'count'
   return 'count'
@@ -144,6 +147,9 @@ function navigateCompanionSection(section: CompanionSection, actions: CompanionA
       break
     case 'setup':
       actions.openSettings()
+      break
+    case 'learn':
+      actions.openLearn(0)
       break
     case 'reference':
       actions.openGuide(0)
@@ -178,6 +184,8 @@ function renderActiveSection(section: CompanionSection, state: AppState): string
   switch (section) {
     case 'setup':
       return renderSetupWorkspace(state)
+    case 'learn':
+      return renderLearnWorkspace(state)
     case 'reference':
       return renderReferenceWorkspace()
     case 'plays':
@@ -293,11 +301,43 @@ function renderReferenceWorkspace(): string {
   `
 }
 
+function renderLearnWorkspace(state: AppState): string {
+  return `
+    <div class="count-workspace learn-workspace">
+      <section class="reference-panel learn-panel" aria-label="Learn card counting">
+        <div class="panel-heading">
+          <div>
+            <span>Learn</span>
+            <h2>Card counting basics</h2>
+          </div>
+          <strong>${state.learnPage + 1}/${learnPages.length}</strong>
+        </div>
+        <div class="learn-grid">
+          ${learnPages.map((page, index) => renderLearnCard(page.title, page.rows, index === state.learnPage)).join('')}
+        </div>
+      </section>
+    </div>
+  `
+}
+
 function renderPlaysWorkspace(state: AppState): string {
   return `
     <div class="count-workspace plays-workspace">
       ${renderDeviationReference(state)}
     </div>
+  `
+}
+
+function renderLearnCard(title: string, rows: readonly string[], isActive: boolean): string {
+  const active = isActive ? ' active' : ''
+
+  return `
+    <article class="learn-card${active}">
+      <h3>${title}</h3>
+      <ul>
+        ${rows.map((row) => `<li>${row}</li>`).join('')}
+      </ul>
+    </article>
   `
 }
 
@@ -437,7 +477,7 @@ export function installCompanionStyles(): void {
 
     .section-tabs {
       display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+      grid-template-columns: repeat(5, minmax(0, 1fr));
       gap: 4px;
       padding: 4px;
       border: 1px solid var(--line);
@@ -507,6 +547,7 @@ export function installCompanionStyles(): void {
       margin: 0 auto;
     }
 
+    .learn-workspace,
     .reference-workspace,
     .plays-workspace {
       width: min(920px, 100%);
@@ -928,6 +969,49 @@ export function installCompanionStyles(): void {
       gap: 12px;
     }
 
+    .learn-panel {
+      display: grid;
+      gap: 12px;
+    }
+
+    .learn-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .learn-card {
+      min-width: 0;
+      min-height: 170px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel-muted);
+    }
+
+    .learn-card.active {
+      border-color: rgb(11 125 98 / 45%);
+      background: var(--green-soft);
+    }
+
+    .learn-card h3 {
+      margin: 0 0 8px;
+      color: var(--ink);
+      font-size: 14px;
+      line-height: 1.2;
+    }
+
+    .learn-card ul {
+      display: grid;
+      gap: 6px;
+      margin: 0;
+      padding-left: 18px;
+      color: #394454;
+      font-size: 13px;
+      line-height: 1.35;
+      font-weight: 700;
+    }
+
     .settings-grid {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1239,6 +1323,9 @@ export function installCompanionStyles(): void {
         grid-template-columns: 1fr;
       }
 
+      .learn-grid {
+        grid-template-columns: 1fr;
+      }
     }
 
     @media (max-width: 640px) {
