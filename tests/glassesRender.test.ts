@@ -8,6 +8,7 @@ const countDisplayLines = 8
 const centeredMenuLines = 9
 const upIcon = '\u2191'
 const downIcon = '\u2193'
+const underline = '\u0332'
 
 function state(overrides: Partial<AppState> = {}): AppState {
   return {
@@ -62,7 +63,7 @@ describe('glasses renderer', () => {
     expect(output).toContain('RC: 0')
     expect(output).toContain('TCi: 0')
     expect(output).toContain('SEEN: 2/312')
-    expect(output).toContain('LAST: L H')
+    expect(output).toContain(`LAST: L H${underline}`)
     expect(output).toContain('TRUE: 0.0')
     expect(output).toContain('LEFT: 6.0D')
     expect(output).toContain('PEN: 1%')
@@ -79,7 +80,7 @@ describe('glasses renderer', () => {
     expect(lines[0]).toContain('SEEN: 2/312')
     expect(lines[1]).toBe('')
     expect(lines[6]).toBe('')
-    expect(lines[4]).toContain('LAST: L H')
+    expect(lines[4]).toContain(`LAST: L H${underline}`)
     expect(lines[5]).toBe('')
     expect(lines[7].indexOf(`${downIcon} LOW +1`)).toBeGreaterThan(5)
     expectFitsGlassesViewport(output)
@@ -104,6 +105,7 @@ describe('glasses renderer', () => {
     expect(byName.rail).toBeUndefined()
     expect(byName.actions.xPosition).toBeGreaterThan(100)
     expect(byName.r1.content).toContain('TRUE: 0.0')
+    expect(byName.left.content).toContain(`LAST: L H${underline}`)
     expect(byName.actions.content).toContain(`${downIcon} LOW +1 | TAP MID 0 | <${upIcon} HIGH -1>`)
   })
 

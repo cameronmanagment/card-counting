@@ -25,6 +25,7 @@ const guideRightColumnX = 410
 const lineHeight = 28
 const upIcon = '\u2191'
 const downIcon = '\u2193'
+const underline = '\u0332'
 
 export interface GlassesTextRegion {
   xPosition: number
@@ -168,7 +169,7 @@ function renderCountParts(state: AppState): {
   actionLine: string
 } {
   const stats = getShoeStats(state.shoe)
-  const lastCards = state.shoe.history.slice(-6).map((bucket) => bucketShortLabels[bucket]).join(' ')
+  const lastCards = formatRecentCards(state.shoe.history.slice(-6))
 
   return {
     leftLines: [
@@ -188,6 +189,15 @@ function renderCountParts(state: AppState): {
     ],
     actionLine: directInputLine(state.selectedBucket),
   }
+}
+
+function formatRecentCards(buckets: CardBucket[]): string {
+  return buckets
+    .map((bucket, index) => {
+      const label = bucketShortLabels[bucket]
+      return index === buckets.length - 1 ? `${label}${underline}` : label
+    })
+    .join(' ')
 }
 
 function renderMenu(state: AppState): string {
