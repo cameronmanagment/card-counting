@@ -202,21 +202,16 @@ function menuLine(item: string, isSelected: boolean): string {
 
 function renderMenuLayout(state: AppState): GlassesTextRegion[] {
   const menuTop = Math.round((canvasHeight - menuItems.length * lineHeight) / 2)
-  const selectedItem = menuItems[state.selectedMenuIndex] ?? menuItems[0]
-  const selectedLabelX = centerXForText(selectedItem)
 
   return [
-    ...menuItems.map((item, index) =>
-      centeredTextRegion(1 + index, `menu-${index}`, item, menuTop + index * lineHeight, lineHeight),
-    ),
     textRegion({
-      id: 7,
-      name: 'menu-marker',
-      x: Math.max(selectedLabelX - 22, 0),
-      y: menuTop + state.selectedMenuIndex * lineHeight,
-      width: 16,
-      height: lineHeight,
-      content: '>',
+      id: 1,
+      name: 'menu-list',
+      x: 0,
+      y: menuTop,
+      width: canvasWidth,
+      height: menuItems.length * lineHeight,
+      content: menuItems.map((item, index) => menuLine(item, index === state.selectedMenuIndex)).join('\n'),
     }),
     textRegion({
       id: 8,

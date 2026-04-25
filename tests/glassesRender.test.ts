@@ -51,12 +51,6 @@ function estimateCharPixelWidth(char: string): number {
   return 10
 }
 
-function expectTextRegionCentered(region: ReturnType<typeof renderGlassesLayout>[number]): void {
-  const textCenter = region.xPosition + estimateTextPixelWidth(region.content) / 2
-
-  expect(Math.abs(textCenter - 288)).toBeLessThanOrEqual(1)
-}
-
 describe('glasses renderer', () => {
   it('renders the count screen with concise self-contained navigation', () => {
     const shoe = applyBucket(applyBucket(createShoe(6), 'low'), 'high')
@@ -172,29 +166,32 @@ describe('glasses renderer', () => {
     })
   })
 
-  it('centers menu rows on the glasses canvas', () => {
+  it('keeps the menu layout stable as selection changes', () => {
     const firstLayout = renderGlassesLayout(state({ mode: 'menu', selectedMenuIndex: 0 }))
     const laterLayout = renderGlassesLayout(state({ mode: 'menu', selectedMenuIndex: 3 }))
     const firstByName = Object.fromEntries(firstLayout.map((region) => [region.containerName, region]))
     const laterByName = Object.fromEntries(laterLayout.map((region) => [region.containerName, region]))
+    const firstMenuLines = firstByName['menu-list'].content.split('\n')
+    const laterMenuLines = laterByName['menu-list'].content.split('\n')
 
-    expect(firstLayout).toHaveLength(8)
+    expect(firstLayout).toHaveLength(2)
     expectOneEventCapture(firstLayout)
     expectOneEventCapture(laterLayout)
     expect(firstByName.input).toMatchObject({ xPosition: 0, yPosition: 0, width: 576, height: 288, isEventCapture: 1 })
-    expect(firstByName['menu-0']).toMatchObject({ yPosition: 60, height: 28, content: 'Resume count' })
-    expect(firstByName['menu-5']).toMatchObject({ yPosition: 200, height: 28, content: 'Exit' })
-    expect(firstByName['menu-marker'].yPosition).toBe(firstByName['menu-0'].yPosition)
-    expect(laterByName['menu-marker'].yPosition).toBe(laterByName['menu-3'].yPosition)
+    expect(firstByName['menu-list']).toMatchObject({ xPosition: 0, yPosition: 60, width: 576, height: 168 })
+    expect(laterByName['menu-list']).toMatchObject({
+      xPosition: firstByName['menu-list'].xPosition,
+      yPosition: firstByName['menu-list'].yPosition,
+      width: firstByName['menu-list'].width,
+      height: firstByName['menu-list'].height,
+    })
+    expect(firstMenuLines[0].indexOf('>')).toBe(firstMenuLines[0].indexOf('Resume count') - 3)
+    expect(laterMenuLines[3].indexOf('>')).toBe(laterMenuLines[3].indexOf('Settings') - 3)
 
     menuItems.forEach((item, index) => {
-      const name = `menu-${index}`
-
-      expect(firstByName[name].content).toBe(item)
-      expect(firstByName[name].content).toBe(firstByName[name].content.trim())
-      expectTextRegionCentered(firstByName[name])
-      expect(laterByName[name].xPosition).toBe(firstByName[name].xPosition)
-      expect(laterByName[name].yPosition).toBe(firstByName[name].yPosition)
+      expect(firstMenuLines[index]).toContain(item)
+      expect(laterMenuLines[index]).toContain(item)
+      expect(firstMenuLines[index].indexOf(item)).toBe(laterMenuLines[index].indexOf(item))
     })
   })
 
