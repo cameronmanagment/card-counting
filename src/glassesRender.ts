@@ -202,12 +202,9 @@ function renderMenu(state: AppState): string {
 }
 
 function menuLine(item: string, isSelected: boolean): string {
-  const itemStart = centerStartFor(item, fullDisplayWidth)
-  const markerStart = Math.max(itemStart - 3, 0)
   const marker = isSelected ? '>' : ' '
-  const gap = Math.max(itemStart - markerStart - 1, 0)
 
-  return fit(`${' '.repeat(markerStart)}${marker}${' '.repeat(gap)}${item}`, fullDisplayWidth).trimEnd()
+  return fit(`${marker} ${item}`, fullDisplayWidth).trimEnd()
 }
 
 function renderMenuLayout(state: AppState): GlassesTextRegion[] {

@@ -150,9 +150,9 @@ describe('glasses renderer', () => {
     expect(lines).toHaveLength(centeredMenuLines)
     expect(lines[0]).toBe('')
     expect(menuLines).toHaveLength(7)
-    expect(menuLines[0].indexOf('Resume count')).toBeGreaterThanOrEqual(20)
-    expect(menuLines[0].indexOf('>')).toBe(menuLines[0].indexOf('Resume count') - 3)
-    expect(menuLines[6].indexOf('Exit')).toBeGreaterThan(menuLines[0].indexOf('Resume count'))
+    expect(menuLines[0].indexOf('Resume count')).toBe(2)
+    expect(menuLines[0].indexOf('>')).toBe(0)
+    expect(menuLines[6].indexOf('Exit')).toBe(2)
     expectFitsGlassesViewport(output)
   })
 
@@ -187,13 +187,14 @@ describe('glasses renderer', () => {
       width: firstByName['menu-list'].width,
       height: firstByName['menu-list'].height,
     })
-    expect(firstMenuLines[0].indexOf('>')).toBe(firstMenuLines[0].indexOf('Resume count') - 3)
-    expect(laterMenuLines[3].indexOf('>')).toBe(laterMenuLines[3].indexOf('Settings') - 3)
+    expect(firstMenuLines[0].indexOf('>')).toBe(0)
+    expect(laterMenuLines[3].indexOf('>')).toBe(0)
 
     menuItems.forEach((item, index) => {
       expect(firstMenuLines[index]).toContain(item)
       expect(laterMenuLines[index]).toContain(item)
       expect(firstMenuLines[index].indexOf(item)).toBe(laterMenuLines[index].indexOf(item))
+      expect(firstMenuLines[index].indexOf(item)).toBe(2)
     })
   })
 
