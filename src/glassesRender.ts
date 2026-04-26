@@ -8,7 +8,6 @@ import {
 import {
   type AppState,
   guidePages,
-  learnPages,
   menuItems,
   selectedDeckCount,
   settingValueLabel,
@@ -23,9 +22,9 @@ const rightEdgeInset = 2
 const rightRailX = 376
 const guideRightColumnX = 410
 const lineHeight = 28
+const appTitle = 'Hi-Lo Count'
 const upIcon = '\u2191'
 const downIcon = '\u2193'
-const underline = '\u0332'
 
 export interface GlassesTextRegion {
   xPosition: number
@@ -195,40 +194,45 @@ function formatRecentCards(buckets: CardBucket[]): string {
   return buckets
     .map((bucket, index) => {
       const label = bucketShortLabels[bucket]
-      return index === buckets.length - 1 ? `${label}${underline}` : label
+      return index === buckets.length - 1 ? `[${label}]` : label
     })
     .join(' ')
 }
 
 function renderMenu(state: AppState): string {
-  return page(
-    [
-    '',
-    ...menuItems.map((item, index) => menuLine(item, index === state.selectedMenuIndex)),
-    '',
-    ],
-    fullDisplayWidth,
-  )
+  return page(renderMenuLines(state), fullDisplayWidth)
 }
 
-function menuLine(item: string, isSelected: boolean): string {
+function renderMenuLines(state: AppState): string[] {
+  return [
+    appTitle,
+    '',
+    ...menuItems.map((item, index) => menuLine(item, index === state.selectedMenuIndex)),
+  ]
+}
+
+function menuLine(item: (typeof menuItems)[number], isSelected: boolean): string {
   const marker = isSelected ? '>' : ' '
 
-  return fit(`${marker} ${item}`, fullDisplayWidth).trimEnd()
+  return fit(`${marker} ${glassesMenuLabel(item)}`, fullDisplayWidth).trimEnd()
+}
+
+function glassesMenuLabel(item: (typeof menuItems)[number]): string {
+  return item === 'Learn' ? 'How to count' : item
 }
 
 function renderMenuLayout(state: AppState): GlassesTextRegion[] {
-  const menuTop = Math.round((canvasHeight - menuItems.length * lineHeight) / 2)
+  const menuLines = renderMenuLines(state)
 
   return [
     textRegion({
       id: 1,
       name: 'menu-list',
       x: 0,
-      y: menuTop,
+      y: 0,
       width: canvasWidth,
-      height: menuItems.length * lineHeight,
-      content: menuItems.map((item, index) => menuLine(item, index === state.selectedMenuIndex)).join('\n'),
+      height: menuLines.length * lineHeight,
+      content: menuLines.join('\n'),
     }),
     textRegion({
       id: 8,
@@ -346,17 +350,17 @@ function renderGuideLayout(state: AppState): GlassesTextRegion[] {
   ]
 }
 
-function renderLearn(state: AppState): string {
+function renderLearn(_state: AppState): string {
   return pageLines(
-    learnRowsFor(state).map((row) =>
+    learnRowsFor().map((row) =>
       row.right === undefined ? row.left : leftRight(row.left, row.right, fullDisplayWidth),
     ),
     fullDisplayWidth,
   )
 }
 
-function renderLearnLayout(state: AppState): GlassesTextRegion[] {
-  const rows = learnRowsFor(state)
+function renderLearnLayout(_state: AppState): GlassesTextRegion[] {
+  const rows = learnRowsFor()
 
   return [
     textRegion({
@@ -399,13 +403,14 @@ function guideRowsFor(state: AppState): GuideRow[] {
   ]
 }
 
-function learnRowsFor(state: AppState): GuideRow[] {
-  const page = learnPages[state.learnPage] ?? learnPages[0]
-
+function learnRowsFor(): GuideRow[] {
   return [
-    { left: `LEARN ${state.learnPage + 1}/${learnPages.length}`, right: page.title },
+    { left: 'LEARN', right: 'PHONE GUIDE' },
     { left: '' },
-    ...page.rows.map((row) => ({ left: row })),
+    { left: 'Use your phone to learn this app.' },
+    { left: 'Open the Learn tab for the guide.' },
+    { left: 'The phone has the full walkthrough.' },
+    { left: 'Glasses are for quick practice.' },
   ]
 }
 

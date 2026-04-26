@@ -107,52 +107,50 @@ export function cycleLearnPage(page: number, step: 1 | -1): number {
 export const learnPages = [
   {
     title: 'START HERE',
-    rows: [
-      'Card counting is a running score.',
-      'You update it after every card.',
-      'The score estimates cards left.',
-      'It is for practice, not live play.',
-      'Start by learning the 3 groups.',
+    paragraphs: [
+      'This app is a practice trainer for the Hi-Lo card-counting system in blackjack. It does not play blackjack for you, and it does not tell you to make bets in a real casino. Its job is simpler: it helps you practice noticing cards, placing each card into the right group, and keeping an accurate count as a shoe is dealt.',
+      'Card counting sounds mysterious at first, but the basic idea is just a running score. Every exposed card gives you a tiny clue about what kinds of cards are still left unseen. Low cards leaving the shoe are generally good for the player because they leave a higher share of tens and aces behind. High cards leaving the shoe are generally bad for the player because they remove the cards that help blackjacks, strong doubles, and dealer busts.',
+      'You do not need to remember every individual card. In Hi-Lo, every card belongs to one of three groups: low cards add one, middle cards add zero, and high cards subtract one. The app is built around those groups so you can practice the habit first, then gradually learn true count and strategy changes once the basic rhythm feels natural.',
     ],
   },
   {
     title: 'HI-LO TAGS',
-    rows: [
-      '2,3,4,5,6 are LOW: add +1.',
-      '7,8,9 are MID: add 0.',
-      '10,J,Q,K,A are HIGH: add -1.',
-      'RC means running count.',
-      'RC is just the live total.',
+    paragraphs: [
+      'The Hi-Lo system gives each card a value, usually called a tag. Cards 2, 3, 4, 5, and 6 are low cards, so each one is worth +1. Cards 7, 8, and 9 are neutral middle cards, so each one is worth 0. Tens, face cards, and aces are high cards, so each one is worth -1.',
+      'As cards appear, you keep one live total called the running count, or RC. If the first three cards are 5, king, and 3, the count goes +1, then back to 0, then up to +1. You are not trying to memorize the exact cards after they pass. You are translating each card into its tag and adding that tag to the current total.',
+      'Middle cards are easy to overlook because they do not change the running count, but they still matter in this app. Logging 7, 8, and 9 keeps the app accurate about how many cards have been seen, how many decks are left, and how deep you are into the shoe.',
+    ],
+  },
+  {
+    title: 'READ SCREEN',
+    paragraphs: [
+      'The glasses count screen is compact, so each label carries a specific job. Seen is how many cards have already been logged. RC is the running count you are maintaining. Last shows the most recent inputs so you can catch mistakes quickly.',
+      'True and TCi are both versions of true count, which adjust the running count for how many decks are left. Left estimates decks remaining, and penetration shows how far into the shoe you are.',
+      'When you are brand new, focus first on the basics: log the correct group, check Last, and keep RC clean. The other labels become useful once the card groups feel automatic.',
     ],
   },
   {
     title: 'TRUE COUNT',
-    rows: [
-      'True count adjusts for decks left.',
-      'Same RC is stronger late in shoe.',
-      'TC = RC divided by decks left.',
-      'TCi is rounded toward zero.',
-      'Higher TC favors the player.',
+    paragraphs: [
+      'The running count tells you the current score, but it does not tell the whole story by itself. A running count of +6 early in a six-deck shoe is very different from a running count of +6 when only one deck is left. The same score is much stronger when fewer unseen cards remain.',
+      'The true count fixes that by dividing the running count by the estimated decks left. For example, if the running count is +6 and about three decks remain, the true count is about +2. If the running count is +6 and about one deck remains, the true count is about +6.',
+      'This app shows both the decimal true count and TCi, an integer true count rounded toward zero for index plays. Higher true counts generally mean the remaining shoe is richer in high cards, which is why the display labels some situations as watch, favorable, or strong.',
     ],
   },
   {
     title: 'USE THE APP',
-    rows: [
-      'Enter one group for every card.',
-      'Swipe down for LOW 2-6.',
-      'Tap for MID 7-9.',
-      'Swipe up for HIGH 10-A.',
-      'Double tap opens menu options.',
+    paragraphs: [
+      'When you practice, imagine cards are being exposed from a blackjack table. For every card you see, enter its group: low for 2 through 6, middle for 7 through 9, and high for 10 through ace. On the glasses, swipe down for low, tap for middle, and swipe up for high. In the web companion, use the group buttons.',
+      'After each input, look at the latest card group and the running count. If you entered the wrong group, use Undo immediately so the running count, cards seen, decks remaining, and true count stay clean. Counting practice works best when accuracy comes before speed.',
+      'The display is intentionally compact while you count. Seen tells you how many cards have been logged. RC is the running count. True and TCi estimate count strength after adjusting for decks left. Penetration shows how far into the shoe you are.',
     ],
   },
   {
     title: 'PRACTICE FLOW',
-    rows: [
-      'Pick decks and rules first.',
-      'Deal cards one at a time.',
-      'Check LAST after each input.',
-      'Undo mistakes right away.',
-      'Use Ref before learning Plays.',
+    paragraphs: [
+      'Start by choosing the deck count and table rules that match the kind of shoe you want to practice. If you are brand new, do not worry about advanced plays yet. Deal cards one at a time, enter every card group, and keep checking whether your running count matches what you expected.',
+      'A good first goal is simply to finish a shoe without losing the count. Once that feels steady, practice faster card recognition: low, middle, high, low, high, and so on. After that, begin paying attention to true count and the reference pages, which explain how a count can affect certain blackjack decisions.',
+      'The Plays tab is for strategy deviations, which are decisions that change only when the true count reaches a certain number. Treat those as a later layer. The foundation is always the same: log every exposed card, keep the running count clean, and understand why the true count changes as decks are used up.',
     ],
   },
 ]

@@ -17,7 +17,7 @@ On the glasses, the main screen is intentionally small and glanceable:
 - `SEEN` shows how many cards have been entered out of the shoe.
 - `RC` is the running count, the simple total from the cards you entered.
 - `TCi` is an integer true count estimate, which adjusts the running count by decks remaining.
-- `LAST` shows the latest few card groups you entered. The newest one is underlined.
+- `LAST` shows the latest few card groups you entered. The newest one is bracketed.
 - The right side shows the count cue, true count, decks left, and shoe penetration.
 - The bottom line shows the direct inputs for low, middle, and high cards.
 

@@ -91,6 +91,13 @@ async function waitForBridgeWithTimeout(timeoutMs: number): Promise<EvenBridge |
 async function createGlassesPage(): Promise<void> {
   if (!bridge) return
 
+  state = {
+    ...state,
+    mode: 'menu',
+    selectedMenuIndex: 0,
+    notice: 'Actions opened',
+  }
+
   const layout = renderGlassesLayout(state)
   const textObject = layout.map(toTextContainer)
 

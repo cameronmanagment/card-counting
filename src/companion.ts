@@ -308,12 +308,24 @@ function renderLearnWorkspace(state: AppState): string {
         <div class="panel-heading">
           <div>
             <span>Learn</span>
-            <h2>Card counting basics</h2>
+            <h2>Card counting from zero</h2>
           </div>
-          <strong>${state.learnPage + 1}/${learnPages.length}</strong>
+          <strong>${learnPages.length} lessons</strong>
+        </div>
+        <div class="learn-intro">
+          <div>
+            <strong>What this trainer teaches</strong>
+            <p>Practice seeing a blackjack card, placing it into the correct Hi-Lo group, and keeping the count clean as the shoe changes.</p>
+          </div>
+          <div class="learn-intro-steps" aria-label="Learning path">
+            <span>See card</span>
+            <span>Choose group</span>
+            <span>Update count</span>
+            <span>Read true count</span>
+          </div>
         </div>
         <div class="learn-grid">
-          ${learnPages.map((page, index) => renderLearnCard(page.title, page.rows, index === state.learnPage)).join('')}
+          ${learnPages.map((page, index) => renderLearnCard(page.title, page.paragraphs, index === state.learnPage)).join('')}
         </div>
       </section>
     </div>
@@ -328,16 +340,81 @@ function renderPlaysWorkspace(state: AppState): string {
   `
 }
 
-function renderLearnCard(title: string, rows: readonly string[], isActive: boolean): string {
+function renderLearnCard(title: string, paragraphs: readonly string[], isActive: boolean): string {
   const active = isActive ? ' active' : ''
 
   return `
     <article class="learn-card${active}">
       <h3>${title}</h3>
-      <ul>
-        ${rows.map((row) => `<li>${row}</li>`).join('')}
-      </ul>
+      ${renderLearnVisual(title)}
+      <div class="learn-copy">
+        ${paragraphs.map((paragraph) => `<p>${paragraph}</p>`).join('')}
+      </div>
     </article>
+  `
+}
+
+function renderLearnVisual(title: string): string {
+  switch (title) {
+    case 'START HERE':
+      return `
+        <div class="learn-visual count-story" aria-label="Running count example">
+          ${renderMiniCard('5', 'low', '+1')}
+          ${renderMiniCard('K', 'high', '-1')}
+          ${renderMiniCard('3', 'low', '+1')}
+          <div class="story-total">
+            <span>RC</span>
+            <strong>+1</strong>
+          </div>
+        </div>
+      `
+    case 'HI-LO TAGS':
+      return `
+        <div class="learn-visual tag-board" aria-label="Hi-Lo card tags">
+          <div class="tag-row low"><strong>2 3 4 5 6</strong><span>Low cards</span><b>+1</b></div>
+          <div class="tag-row mid"><strong>7 8 9</strong><span>Middle cards</span><b>0</b></div>
+          <div class="tag-row high"><strong>10 J Q K A</strong><span>High cards</span><b>-1</b></div>
+        </div>
+      `
+    case 'TRUE COUNT':
+      return `
+        <div class="learn-visual formula-card" aria-label="True count formula">
+          <div><span>Running count</span><strong>+6</strong></div>
+          <b>/</b>
+          <div><span>Decks left</span><strong>3</strong></div>
+          <b>=</b>
+          <div><span>True count</span><strong>+2</strong></div>
+        </div>
+      `
+    case 'USE THE APP':
+      return `
+        <div class="learn-visual input-map" aria-label="App input map">
+          <span class="input-pill low">Swipe down <b>LOW +1</b></span>
+          <span class="input-pill mid">Tap <b>MID 0</b></span>
+          <span class="input-pill high">Swipe up <b>HIGH -1</b></span>
+          <span class="input-pill menu">Double tap <b>Menu</b></span>
+        </div>
+      `
+    case 'PRACTICE FLOW':
+      return `
+        <ol class="learn-visual practice-ladder" aria-label="Practice order">
+          <li><span>1</span><strong>Accuracy</strong><em>Log every card group correctly.</em></li>
+          <li><span>2</span><strong>Speed</strong><em>Recognize groups without pausing.</em></li>
+          <li><span>3</span><strong>True count</strong><em>Notice how deck depth changes strength.</em></li>
+          <li><span>4</span><strong>Plays</strong><em>Add deviations after the count feels steady.</em></li>
+        </ol>
+      `
+    default:
+      return ''
+  }
+}
+
+function renderMiniCard(rank: string, tone: 'low' | 'high', delta: string): string {
+  return `
+    <div class="mini-card ${tone}">
+      <strong>${rank}</strong>
+      <span>${delta}</span>
+    </div>
   `
 }
 
@@ -974,6 +1051,54 @@ export function installCompanionStyles(): void {
       gap: 12px;
     }
 
+    .learn-intro {
+      display: grid;
+      grid-template-columns: minmax(0, 0.9fr) minmax(280px, 1.1fr);
+      gap: 12px;
+      align-items: stretch;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #f8fafc;
+    }
+
+    .learn-intro strong {
+      display: block;
+      color: var(--ink);
+      font-size: 15px;
+      line-height: 1.2;
+    }
+
+    .learn-intro p {
+      margin: 6px 0 0;
+      color: #465163;
+      font-size: 13px;
+      line-height: 1.45;
+      font-weight: 750;
+    }
+
+    .learn-intro-steps {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 6px;
+      align-items: center;
+    }
+
+    .learn-intro-steps span {
+      display: grid;
+      place-items: center;
+      min-height: 44px;
+      padding: 8px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #ffffff;
+      color: #394454;
+      font-size: 12px;
+      line-height: 1.15;
+      font-weight: 900;
+      text-align: center;
+    }
+
     .learn-grid {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -982,8 +1107,8 @@ export function installCompanionStyles(): void {
 
     .learn-card {
       min-width: 0;
-      min-height: 170px;
-      padding: 12px;
+      min-height: 220px;
+      padding: 14px;
       border: 1px solid var(--line);
       border-radius: 8px;
       background: var(--panel-muted);
@@ -995,20 +1120,257 @@ export function installCompanionStyles(): void {
     }
 
     .learn-card h3 {
-      margin: 0 0 8px;
+      margin: 0 0 10px;
       color: var(--ink);
       font-size: 14px;
       line-height: 1.2;
     }
 
-    .learn-card ul {
+    .learn-visual {
+      margin-bottom: 12px;
+    }
+
+    .count-story {
       display: grid;
-      gap: 6px;
-      margin: 0;
-      padding-left: 18px;
-      color: #394454;
+      grid-template-columns: repeat(3, 54px) minmax(74px, 1fr);
+      gap: 8px;
+      align-items: stretch;
+    }
+
+    .mini-card {
+      min-height: 76px;
+      display: grid;
+      place-items: center;
+      padding: 8px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #ffffff;
+      color: var(--ink);
+      box-shadow: 0 6px 14px rgb(24 32 47 / 7%);
+    }
+
+    .mini-card strong {
+      font-size: 24px;
+      line-height: 1;
+    }
+
+    .mini-card span {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .mini-card.low {
+      border-color: #adddcd;
+      background: #f4fbf8;
+    }
+
+    .mini-card.high {
+      border-color: #f0beb8;
+      background: #fff7f5;
+    }
+
+    .story-total {
+      min-height: 76px;
+      display: grid;
+      place-items: center;
+      border: 1px solid #b8e4d6;
+      border-radius: 8px;
+      background: var(--green-soft);
+      color: var(--green);
+    }
+
+    .story-total span {
+      font-size: 11px;
+      font-weight: 900;
+    }
+
+    .story-total strong {
+      font-size: 28px;
+      line-height: 1;
+    }
+
+    .tag-board,
+    .input-map,
+    .practice-ladder {
+      display: grid;
+      gap: 7px;
+    }
+
+    .tag-row {
+      display: grid;
+      grid-template-columns: minmax(92px, 1fr) minmax(92px, 1fr) 48px;
+      gap: 8px;
+      align-items: center;
+      min-height: 42px;
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #ffffff;
+    }
+
+    .tag-row strong,
+    .tag-row b {
+      color: var(--ink);
       font-size: 13px;
-      line-height: 1.35;
+      line-height: 1.1;
+      font-weight: 900;
+    }
+
+    .tag-row span {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .tag-row b {
+      justify-self: end;
+    }
+
+    .tag-row.low {
+      background: var(--green-soft);
+      border-color: #b8e4d6;
+    }
+
+    .tag-row.mid {
+      background: var(--amber-soft);
+      border-color: #efd186;
+    }
+
+    .tag-row.high {
+      background: var(--red-soft);
+      border-color: #f0beb8;
+    }
+
+    .formula-card {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 20px minmax(0, 1fr) 20px minmax(0, 1fr);
+      gap: 7px;
+      align-items: center;
+    }
+
+    .formula-card div {
+      min-height: 76px;
+      display: grid;
+      place-items: center;
+      padding: 8px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #ffffff;
+      text-align: center;
+    }
+
+    .formula-card span {
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.15;
+      font-weight: 850;
+    }
+
+    .formula-card strong {
+      color: var(--ink);
+      font-size: 24px;
+      line-height: 1;
+    }
+
+    .formula-card > b {
+      color: var(--muted);
+      font-size: 20px;
+      text-align: center;
+    }
+
+    .input-pill {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      align-items: center;
+      min-height: 38px;
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #ffffff;
+      color: #394454;
+      font-size: 12px;
+      font-weight: 850;
+    }
+
+    .input-pill b {
+      white-space: nowrap;
+    }
+
+    .input-pill.low {
+      background: var(--green-soft);
+      border-color: #b8e4d6;
+    }
+
+    .input-pill.mid {
+      background: var(--amber-soft);
+      border-color: #efd186;
+    }
+
+    .input-pill.high {
+      background: var(--red-soft);
+      border-color: #f0beb8;
+    }
+
+    .input-pill.menu {
+      background: #eef2f6;
+    }
+
+    .practice-ladder {
+      margin: 0 0 12px;
+      padding: 0;
+      list-style: none;
+    }
+
+    .practice-ladder li {
+      display: grid;
+      grid-template-columns: 28px minmax(72px, 0.4fr) minmax(0, 1fr);
+      gap: 8px;
+      align-items: center;
+      min-height: 44px;
+      padding: 8px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #ffffff;
+    }
+
+    .practice-ladder span {
+      display: grid;
+      place-items: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 999px;
+      background: var(--ink);
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .practice-ladder strong {
+      color: var(--ink);
+      font-size: 12px;
+      line-height: 1.15;
+    }
+
+    .practice-ladder em {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.25;
+      font-style: normal;
+      font-weight: 750;
+    }
+
+    .learn-copy {
+      display: grid;
+      gap: 9px;
+      color: #394454;
+    }
+
+    .learn-copy p {
+      margin: 0;
+      font-size: 13px;
+      line-height: 1.48;
       font-weight: 700;
     }
 
@@ -1326,6 +1688,10 @@ export function installCompanionStyles(): void {
       .learn-grid {
         grid-template-columns: 1fr;
       }
+
+      .learn-intro {
+        grid-template-columns: 1fr;
+      }
     }
 
     @media (max-width: 640px) {
@@ -1447,6 +1813,19 @@ export function installCompanionStyles(): void {
       .reference-table {
         table-layout: auto;
       }
+
+      .learn-intro-steps,
+      .formula-card {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .formula-card > b {
+        display: none;
+      }
+
+      .count-story {
+        grid-template-columns: repeat(3, 54px) minmax(70px, 1fr);
+      }
     }
 
     @media (max-width: 390px) {
@@ -1465,6 +1844,20 @@ export function installCompanionStyles(): void {
 
       .shoe-metrics div {
         padding: 8px;
+      }
+
+      .learn-intro-steps,
+      .tag-row,
+      .practice-ladder li {
+        grid-template-columns: 1fr;
+      }
+
+      .tag-row b {
+        justify-self: start;
+      }
+
+      .count-story {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
       }
     }
   `
