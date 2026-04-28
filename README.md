@@ -1,6 +1,6 @@
-# Hi-Lo Count
+# Card Counting
 
-Hi-Lo Count is a practice app for learning the basic Hi-Lo blackjack card-counting system on Even Realities G2 glasses, in Even Hub, or in a normal browser. It is meant for training and simulation: you watch cards appear in a practice shoe, enter each card by group, and the app keeps the running count, estimated true count, cards seen, decks remaining, and a short history of your latest inputs.
+Card Counting is a practice app for learning the basic Hi-Lo blackjack card-counting system on Even Realities G2 glasses, in Even Hub, or in a normal browser. It is meant for training and simulation: you watch cards appear in a practice shoe, enter each card by group, and the app keeps the running count, estimated true count, cards seen, decks remaining, and a short history of your latest inputs.
 
 If you have never counted cards before, start here: Hi-Lo does not ask you to remember every card individually. Each exposed card belongs to one of three groups:
 
@@ -76,9 +76,10 @@ This app is for lawful personal practice and simulation. Do not use it in any ca
 
 ```bash
 npm install
-npm run dev
 npm run simulate
 ```
+
+`npm run simulate` starts the Vite dev server, waits for it to be reachable, and then opens the Even Hub simulator.
 
 For hardware sideloading:
 

@@ -6,7 +6,7 @@ import { menuItems, type AppState } from '../src/state'
 const textLineWidth = 58
 const countDisplayLines = 8
 const centeredMenuLines = 9
-const menuTitle = 'Hi-Lo Count'
+const menuTitle = 'Card Counting'
 const upIcon = '\u2191'
 const downIcon = '\u2193'
 
@@ -26,10 +26,10 @@ function state(overrides: Partial<AppState> = {}): AppState {
   }
 }
 
-function expectFitsGlassesViewport(output: string): void {
+function expectFitsGlassesViewport(output: string, minLines = 5): void {
   const lines = output.split('\n')
 
-  expect(lines.length).toBeGreaterThanOrEqual(5)
+  expect(lines.length).toBeGreaterThanOrEqual(minLines)
   expect(lines.length).toBeLessThanOrEqual(centeredMenuLines)
   expect(Math.max(...lines.map((line) => line.length))).toBeLessThanOrEqual(textLineWidth)
 }
@@ -87,7 +87,7 @@ describe('glasses renderer', () => {
     expect(lines[4]).toContain('LAST: L [H]')
     expect(lines[5]).toBe('')
     expect(lines[7].indexOf(`${downIcon} LOW +1`)).toBeGreaterThan(5)
-    expectFitsGlassesViewport(output)
+    expectFitsGlassesViewport(output, 3)
   })
 
   it('positions count screen regions across the full 576px canvas', () => {
@@ -162,7 +162,7 @@ describe('glasses renderer', () => {
     expect(menuLines[1].indexOf('Resume count')).toBe(2)
     expect(menuLines[1].indexOf('>')).toBe(0)
     expect(menuLines[7].indexOf('Exit')).toBe(2)
-    expectFitsGlassesViewport(output)
+    expectFitsGlassesViewport(output, 3)
   })
 
   it('keeps fallback menu label positions stable as selection changes', () => {
@@ -239,17 +239,14 @@ describe('glasses renderer', () => {
 
     expect(output).toContain('LEARN')
     expect(output).toContain('PHONE GUIDE')
-    expect(output).toContain('Use your phone to learn this app.')
-    expect(output).toContain('Open the Learn tab for the guide.')
-    expect(output).toContain('The phone has the full walkthrough.')
-    expect(output).toContain('Glasses are for quick practice.')
+    expect(output).toContain('Use Learn on your phone. Glasses are for practice.')
     expect(output).not.toContain('LEARN 5/6')
     expect(output).not.toContain('Swipe up: HIGH 10-A.')
-    expectFitsGlassesViewport(output)
+    expectFitsGlassesViewport(output, 3)
     expect(layout).toHaveLength(3)
     expectOneEventCapture(layout)
-    expect(byName['learn-left']).toMatchObject({ xPosition: 0, yPosition: 0, width: 576, height: 168 })
-    expect(byName['learn-right']).toMatchObject({ xPosition: 410, yPosition: 0, width: 166, height: 168 })
+    expect(byName['learn-left']).toMatchObject({ xPosition: 0, yPosition: 0, width: 576, height: 84 })
+    expect(byName['learn-right']).toMatchObject({ xPosition: 410, yPosition: 0, width: 166, height: 84 })
     expect(byName['learn-right'].content.split('\n')[0]).toBe('PHONE GUIDE')
     expect(byName.input).toMatchObject({ xPosition: 0, yPosition: 0, width: 576, height: 288, isEventCapture: 1 })
   })
@@ -259,8 +256,8 @@ describe('glasses renderer', () => {
     const laterPage = renderGlasses(state({ mode: 'learn', learnPage: 5 }))
 
     expect(laterPage).toBe(firstPage)
-    expect(firstPage.split('\n')).toHaveLength(6)
-    expectFitsGlassesViewport(firstPage)
+    expect(firstPage.split('\n')).toHaveLength(3)
+    expectFitsGlassesViewport(firstPage, 3)
   })
 
   it('renders setup across the full glasses width without navigation hints', () => {

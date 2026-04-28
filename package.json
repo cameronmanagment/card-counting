@@ -8,7 +8,7 @@
     "build": "tsc --noEmit && vite build",
     "test": "vitest run",
     "pack": "evenhub pack app.json dist -o card-counting.ehpk",
-    "simulate": "evenhub-simulator http://localhost:5173"
+    "simulate": "node scripts/simulate.mjs"
   },
   "dependencies": {
     "@evenrealities/even_hub_sdk": "^0.0.10"

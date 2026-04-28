@@ -22,7 +22,7 @@ const rightEdgeInset = 2
 const rightRailX = 376
 const guideRightColumnX = 410
 const lineHeight = 28
-const appTitle = 'Hi-Lo Count'
+const appTitle = 'Card Counting'
 const upIcon = '\u2191'
 const downIcon = '\u2193'
 
@@ -407,10 +407,7 @@ function learnRowsFor(): GuideRow[] {
   return [
     { left: 'LEARN', right: 'PHONE GUIDE' },
     { left: '' },
-    { left: 'Use your phone to learn this app.' },
-    { left: 'Open the Learn tab for the guide.' },
-    { left: 'The phone has the full walkthrough.' },
-    { left: 'Glasses are for quick practice.' },
+    { left: 'Use Learn on your phone. Glasses are for practice.' },
   ]
 }
 

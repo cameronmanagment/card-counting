@@ -242,6 +242,11 @@ function handlePress(): void {
 }
 
 function handleDoublePress(): void {
+  if (state.mode === 'menu') {
+    void exitWithSystemDialog()
+    return
+  }
+
   if (state.mode === 'count') {
     updateState({
       ...state,

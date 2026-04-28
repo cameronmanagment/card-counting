@@ -1,7 +1,7 @@
 {
   "package_id": "com.cardcounting.trainer",
   "edition": "202601",
-  "name": "Hi-Lo Count",
+  "name": "Card Counting",
   "version": "0.1.0",
   "min_app_version": "2.0.0",
   "min_sdk_version": "0.0.10",

@@ -54,7 +54,7 @@ export function renderCompanion(root: HTMLElement, state: AppState, actions: Com
           <div class="brand-lockup">
             <span class="brand-mark" aria-hidden="true">HL</span>
             <div>
-              <p class="eyebrow">Hi-Lo Count</p>
+              <p class="eyebrow">Card Counting</p>
               <h1>Trainer</h1>
             </div>
           </div>
